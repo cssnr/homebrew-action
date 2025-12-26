@@ -20,11 +20,13 @@
 
 Homebrew Action to Update Version.
 
+This action is a work-in-progress and may have breaking changes.
+
 ```yaml
 - name: 'Homebrew Action'
   uses: cssnr/homebrew-action@test
   with:
-    version: ${{ env.ref_name }}
+    version: ${{ github.ref_name }}
     repo: cssnr/homebrew-tap
     branch: master # optional
     formula: toml-run.rb # optional
