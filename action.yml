@@ -1,0 +1,67 @@
+name: "Homebrew Action"
+description: "Homebrew Action."
+author: "Shane"
+
+branding:
+  icon: git-pull-request
+  color: "orange"
+
+inputs:
+  version:
+    description: "Version to update. You probably want: github.ref_name"
+    required: true
+  repo:
+    description: "Repository owner/name of the homebrew tap."
+    default: "${{ github.repository }}"
+  formula:
+    description: "Formula file relative to the Formula directory."
+    default: ""
+  branch:
+    description: "Branch to Checkout and Push too."
+    default: "master"
+  token:
+    description: "Fine Grained or Personal Access Token with permissions contents: write"
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Checkout Homebrew"
+      uses: actions/checkout@v6
+      with:
+        path: ${{ runner.temp }}/tap
+        persist-credentials: false
+        ref: ${{ inputs.branch }}
+        repository: ${{ inputs.repo }}
+
+    - name: "Formula File"
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.formula }}" ];then
+          echo "formula=${{ inputs.formula }}" >> "$GITHUB_ENV"
+        else
+          echo "formula=${GITHUB_REPOSITORY#*/}.rb" >> "$GITHUB_ENV"
+        fi
+
+    - name: "Update Version"
+      env:
+        file: ${{ runner.temp }}/tap/Formula/${{ env.formula }}
+      shell: bash
+      run: |
+        if [ ! -f "${{ env.file }}" ];then
+          echo "Not a File - env.file: ${{ env.file }}"
+          exit 1
+        fi
+        line=$(grep -n -m1 version "${{ env.file }}" | cut -f1 -d:)
+        echo "line: ${line}"
+        sed -i "${line}"'s/.*/  version "${{ inputs.version }}"/' "${{ env.file }}"
+        cat "${{ env.file }}"
+
+    - name: "Commit and Push"
+      working-directory: ${{ runner.temp }}/tap
+      shell: bash
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git commit -a -m "Bump ${{ inputs.formula }} to ${{ inputs.version }}"
+        git remote set-url origin "https://${{ inputs.token }}@github.com/${{ inputs.repo }}"
+        git push -u origin ${{ inputs.branch }}
