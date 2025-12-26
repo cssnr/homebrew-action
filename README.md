@@ -12,13 +12,32 @@
 
 # Homebrew Action
 
-<a title="Homebrew Action" href="https://homebrew-action.cssnr.com/" target="_blank">
-<img alt="Homebrew Action" align="right" width="128" height="auto" src="https://raw.githubusercontent.com/smashedr/repo-images/refs/heads/master/homebrew-action/logo160.png"></a>
+<a title="Homebrew Action" href="https://actions.cssnr.com/" target="_blank">
+<img alt="Homebrew Action" align="right" width="128" height="auto" src="https://raw.githubusercontent.com/cssnr/homebrew-action/refs/heads/master/.github/assets/logo.svg"></a>
 
 - [Support](#Support)
 - [Contributing](#Contributing)
 
-Work in Progress. Homebrew Action.
+Homebrew Action to Update Version.
+
+```yaml
+- name: 'Homebrew Action'
+  uses: cssnr/homebrew-action@test
+  with:
+    version: ${{ env.ref_name }}
+    repo: cssnr/homebrew-tap
+    branch: master # optional
+    formula: toml-run.rb # optional
+    token: ${{ secrets.HOMEBREW_PAT }}
+```
+
+| Input&nbsp;Name | Default&nbsp;Value | Description&nbsp;of&nbsp;Input        |
+| :-------------- | :----------------: | :------------------------------------ |
+| `version`       |     _Required_     | Version to Update Too                 |
+| `repo`          |     _Required_     | Repository `{owner}/{name}`           |
+| `branch`        |      `master`      | Branch to Checkout/Commit             |
+| `formula`       |    `{name}.rb`     | Formula File relative to `Formula`    |
+| `token`         |     _Required_     | Fine Grained or Personal Access Token |
 
 # Support
 

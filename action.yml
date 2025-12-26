@@ -1,5 +1,5 @@
 name: "Homebrew Action"
-description: "Homebrew Action."
+description: "Homebrew Action to Update Version."
 author: "Shane"
 
 branding:
@@ -12,7 +12,8 @@ inputs:
     required: true
   repo:
     description: "Repository owner/name of the homebrew tap."
-    default: "${{ github.repository }}"
+    #default: "${{ github.repository }}"
+    required: true
   formula:
     description: "Formula file relative to the Formula directory."
     default: ""
@@ -21,6 +22,7 @@ inputs:
     default: "master"
   token:
     description: "Fine Grained or Personal Access Token with permissions contents: write"
+    required: true
 
 runs:
   using: "composite"
@@ -28,7 +30,7 @@ runs:
     - name: "Checkout Homebrew"
       uses: actions/checkout@v6
       with:
-        path: ${{ runner.temp }}/tap
+        path: homebrew-tap
         persist-credentials: false
         ref: ${{ inputs.branch }}
         repository: ${{ inputs.repo }}
@@ -44,7 +46,7 @@ runs:
 
     - name: "Update Version"
       env:
-        file: ${{ runner.temp }}/tap/Formula/${{ env.formula }}
+        file: homebrew-tap/Formula/${{ env.formula }}
       shell: bash
       run: |
         if [ ! -f "${{ env.file }}" ];then
@@ -57,7 +59,7 @@ runs:
         cat "${{ env.file }}"
 
     - name: "Commit and Push"
-      working-directory: ${{ runner.temp }}/tap
+      working-directory: homebrew-tap
       shell: bash
       run: |
         git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
