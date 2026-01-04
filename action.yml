@@ -147,13 +147,23 @@ runs:
     #    default_author: github_actions
     #    fetch: false
 
-    - uses: suzuki-shunsuke/commit-action@v0.0.14
+    #- uses: suzuki-shunsuke/commit-action@v0.0.14
+    #  with:
+    #    root_dir: homebrew-tap
+    #    branch: ${{ steps.branch.outputs.default }}
+    #    repository: ${{ inputs.repo }}
+    #    commit_message: ${{ steps.summary.outputs.message }}
+    #    github_token: ${{ inputs.token }}
+
+    - name: Commit changes
+      uses: iarekylew00t/verified-bot-commit@v2
       with:
-        root_dir: homebrew-tap
-        branch: ${{ steps.branch.outputs.default }}
+        files: Formula/${{ inputs.formula }} # TODO: Testing only, can't use inputs.formula
+        token: ${{ inputs.token }}
+        workspace: homebrew-tap
+        ref: refs/heads/${{ steps.branch.outputs.default }}
         repository: ${{ inputs.repo }}
-        commit_message: ${{ steps.summary.outputs.message }}
-        github_token: ${{ inputs.token }}
+        message: ${{ steps.summary.outputs.message }}
 
     #- name: Commit file
     #  uses: swinton/commit@v2.x
