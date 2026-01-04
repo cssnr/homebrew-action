@@ -4,8 +4,8 @@ name: "Test"
 
 on:
   workflow_dispatch:
-  #push:
-  #  branches: ["**"]
+  push:
+    branches-ignore: ["master"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

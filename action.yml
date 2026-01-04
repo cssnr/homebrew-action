@@ -137,16 +137,49 @@ runs:
         md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
-    - name: "Commit and Push"
-      working-directory: homebrew-tap
-      shell: bash
-      run: |
-        echo "message: ${{ steps.summary.outputs.message }}"
-        echo "name: github-actions[bot]"
-        echo "email: 41898282+github-actions[bot]@users.noreply.github.com"
+    - uses: EndBug/add-and-commit@v9
+      with:
+        cwd: homebrew-tap
+        author_name: github-actions[bot]
+        author_email: 41898282+github-actions[bot]@users.noreply.github.com
+        message: ${{ steps.summary.outputs.message }}
+        github_token: ${{ inputs.token }}
+        # Determines the way the action fills missing author name and email. Three options are available:
+        # - github_actor -> UserName <UserName@users.noreply.github.com>
+        # - user_info -> Your Display Name <your-actual@email.com>
+        # - github_actions -> github-actions <email associated with the github logo>
+        # Default: github_actor
+        default_author: github_actions
+        # Arguments for the git fetch command. If set to false, the action won't fetch the repo.
+        # For more info as to why fetching is usually recommended, please see the "Performance on large repos" FAQ.
+        # Default: --tags --force
+        fetch: false
 
-        git config --local user.name "github-actions[bot]"
-        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git commit -a -m "${{ steps.summary.outputs.message }}"
-        git remote set-url origin "https://${{ inputs.token }}@github.com/${{ inputs.repo }}"
-        git push -u origin ${{ steps.branch.outputs.default }}
+    #- uses: suzuki-shunsuke/commit-action@v0.0.14
+    #  with:
+    #    branch: ${{ steps.branch.outputs.default }}
+    #    repository: ${{ inputs.repo }}
+    #    commit_message: ${{ steps.summary.outputs.message }}
+
+    #- name: Commit file
+    #  uses: swinton/commit@v2.x
+    #  env:
+    #    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #  with:
+    #    files: ${{ env.formula }}
+    #    commit-message: ${{ steps.summary.outputs.message }}
+    #    ref: refs/heads/${{ steps.branch.outputs.default }}
+
+    #- name: "Commit and Push"
+    #  working-directory: homebrew-tap
+    #  shell: bash
+    #  run: |
+    #    echo "message: ${{ steps.summary.outputs.message }}"
+    #    echo "name: github-actions[bot]"
+    #    echo "email: 41898282+github-actions[bot]@users.noreply.github.com"
+    #
+    #    git config --local user.name "github-actions[bot]"
+    #    git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    #    git commit -a -m "${{ steps.summary.outputs.message }}"
+    #    git remote set-url origin "https://${{ inputs.token }}@github.com/${{ inputs.repo }}"
+    #    git push -u origin ${{ steps.branch.outputs.default }}
