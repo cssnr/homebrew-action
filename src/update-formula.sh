@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -e
+
+key="${1}"
+value="${2}"
+
+if [ -z "${value}" ];then
+    echo "Skipping: ${key} - not provided."
+    exit 0
+fi
+
+echo "::group::Processing: ${key}"
+echo "value: ${value}"
+
+# shellcheck disable=SC2154
+line=$(grep -n -m1 '^[[:space:]]*'"${key} " "${formula}" | cut -f1 -d:)
+echo "line: ${line}"
+sed -i "${line}"'s,.*,'"  ${key} \"${value}\"," "${formula}"
+
+echo "::endgroup::"

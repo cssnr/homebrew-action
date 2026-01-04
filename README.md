@@ -26,20 +26,26 @@ This action is a work-in-progress and may have breaking changes.
 - name: 'Homebrew Action'
   uses: cssnr/homebrew-action@test
   with:
-    version: ${{ github.ref_name }}
+    url: # optional
+    sha256: # optional
+    version: ${{ github.ref_name }} # optional
     repo: cssnr/homebrew-tap
-    branch: master # optional
     formula: toml-run.rb # optional
+    message: Bump toml-run # optional
+    branch: master # optional
     token: ${{ secrets.HOMEBREW_PAT }}
 ```
 
-| Input&nbsp;Name | Default&nbsp;Value | Description&nbsp;of&nbsp;Input        |
-| :-------------- | :----------------: | :------------------------------------ |
-| `version`       |     _Required_     | Version to Update Too                 |
-| `repo`          |     _Required_     | Repository `{owner}/{name}`           |
-| `branch`        |      `master`      | Branch to Checkout/Commit             |
-| `formula`       |    `{name}.rb`     | Formula File relative to `Formula`    |
-| `token`         |     _Required_     | Fine Grained or Personal Access Token |
+| Input&nbsp;Name |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input        |
+| :-------------- | :-------------------: | :------------------------------------ |
+| `url`           |           -           | URL to Update Too                     |
+| `sha256`        |           -           | SHA256 to Update Too                  |
+| `version`       |           -           | Version to Update Too                 |
+| `repo`          |      _Required_       | Repository `{owner}/{name}`           |
+| `formula`       |   `{repo name}.rb`    | Formula File relative to `Formula`    |
+| `message`       | Bump `{.rb}` to `{v}` | Branch to Checkout/Commit             |
+| `branch`        |   _Default Branch_    | Branch to Checkout/Commit             |
+| `token`         |      _Required_       | Fine Grained or Personal Access Token |
 
 # Support
 
@@ -73,7 +79,8 @@ Additionally, you can support other [GitHub Actions](https://actions.cssnr.com/)
 - [Portainer Stack Deploy Action](https://github.com/cssnr/portainer-stack-deploy-action?tab=readme-ov-file#readme)
 - [Docker Context Action](https://github.com/cssnr/docker-context-action?tab=readme-ov-file#readme)
 - [Actions Up Action](https://github.com/cssnr/actions-up-action?tab=readme-ov-file#readme)
-- [Zensical Action](https://github.com/cssnr/homebrew-action?tab=readme-ov-file#readme)
+- [Rhysd Actionlint Action](https://github.com/cssnr/actionlint-action?tab=readme-ov-file#readme)
+- [Zensical Action](https://github.com/cssnr/zensical-action?tab=readme-ov-file#readme)
 - [VirusTotal Action](https://github.com/cssnr/virustotal-action?tab=readme-ov-file#readme)
 - [Mirror Repository Action](https://github.com/cssnr/mirror-repository-action?tab=readme-ov-file#readme)
 - [Update Version Tags Action](https://github.com/cssnr/update-version-tags-action?tab=readme-ov-file#readme)
@@ -99,6 +106,7 @@ These actions are not published on the Marketplace, but may be useful.
 
 - [cssnr/create-files-action](https://github.com/cssnr/create-files-action?tab=readme-ov-file#readme) - Create various files from templates.
 - [cssnr/draft-release-action](https://github.com/cssnr/draft-release-action?tab=readme-ov-file#readme) - Keep a draft release ready to publish.
+- [cssnr/homebrew-action](https://github.com/cssnr/homebrew-action?tab=readme-ov-file#readme) - Homebrew formula update action.
 - [cssnr/env-json-action](https://github.com/cssnr/env-json-action?tab=readme-ov-file#readme) - Convert env file to json or vice versa.
 - [cssnr/push-artifacts-action](https://github.com/cssnr/push-artifacts-action?tab=readme-ov-file#readme) - Sync files to a remote host with rsync.
 - [smashedr/update-release-notes-action](https://github.com/smashedr/update-release-notes-action?tab=readme-ov-file#readme) - Update release notes.
