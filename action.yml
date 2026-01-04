@@ -1,5 +1,5 @@
 name: "Homebrew Action"
-description: "Homebrew Action to Update Version."
+description: "Homebrew Action to Update Formula."
 author: "Shane"
 
 branding:
@@ -7,63 +7,146 @@ branding:
   color: "orange"
 
 inputs:
+  url:
+    description: "URL to update."
+    default: ""
+  sha256:
+    description: "SHA256 hash to update."
+    default: ""
   version:
-    description: "Version to update. You probably want: github.ref_name"
-    required: true
+    description: "Version to update."
+    default: ""
   repo:
-    description: "Repository owner/name of the homebrew tap."
-    #default: "${{ github.repository }}"
+    description: "Homebrew Tap: owner/name"
     required: true
   formula:
-    description: "Formula file relative to the Formula directory."
+    description: "Formula file name."
+    default: ""
+  message:
+    description: "Commit message."
     default: ""
   branch:
-    description: "Branch to Checkout and Push too."
-    default: "master"
+    description: "Branch to Checkout and Commit."
+    default: ""
   token:
-    description: "Fine Grained or Personal Access Token with permissions contents: write"
+    description: "Fine Grained or PAT w/ contents: write"
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: "Checkout Homebrew"
+    - name: "Debug Inputs"
+      shell: bash
+      run: |
+        echo "inputs.url: ${{ inputs.url }}"
+        echo "inputs.sha256: ${{ inputs.sha256 }}"
+        echo "inputs.version: ${{ inputs.version }}"
+
+        echo "inputs.repo: ${{ inputs.repo }}"
+        echo "inputs.formula: ${{ inputs.formula }}"
+        echo "inputs.message: ${{ inputs.message }}"
+        echo "inputs.branch: ${{ inputs.branch }}"
+
+    - name: "Get Default Branch"
+      id: branch
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.branch }}" ];then
+          branch="${{ inputs.branch }}"
+        else
+          branch="$(gh repo view ${{ inputs.repo }} --json defaultBranchRef --jq .defaultBranchRef.name)"
+        fi
+        echo "branch: ${branch}"
+        echo "default=${branch}" >> "$GITHUB_OUTPUT"
+
+    - name: "Checkout Homebrew Tap"
       uses: actions/checkout@v6
       with:
         path: homebrew-tap
         persist-credentials: false
-        ref: ${{ inputs.branch }}
+        ref: ${{ steps.branch.outputs.default }}
         repository: ${{ inputs.repo }}
 
-    - name: "Formula File"
+    - name: "Set Formula File"
+      env:
+        path: homebrew-tap/Formula
       shell: bash
       run: |
+        echo "::group::ls ${{ env.path }}"
+        ls -lah "${{ env.path }}"
+        echo "::endgroup::"
+
         if [ -n "${{ inputs.formula }}" ];then
-          echo "formula=${{ inputs.formula }}" >> "$GITHUB_ENV"
+          if [ -f "${{ env.path }}/${{ inputs.formula }}" ];then
+            echo "formula=${{ env.path }}/${{ inputs.formula }}" >> "$GITHUB_ENV"
+          elif [ -f "${{ env.path }}/${{ inputs.formula }}.rb" ];then
+            echo "formula=${{ env.path }}/${{ inputs.formula }}.rb" >> "$GITHUB_ENV"
+          fi
         else
-          echo "formula=${GITHUB_REPOSITORY#*/}.rb" >> "$GITHUB_ENV"
+          echo "formula=${{ env.path }}/${GITHUB_REPOSITORY#*/}.rb" >> "$GITHUB_ENV"
         fi
 
-    - name: "Update Version"
-      env:
-        file: homebrew-tap/Formula/${{ env.formula }}
+    - name: "Update Formula"
       shell: bash
       run: |
-        if [ ! -f "${{ env.file }}" ];then
-          echo "Not a File - env.file: ${{ env.file }}"
+        echo "formula: ${{ env.formula }}"
+        if [ ! -f "${{ env.formula }}" ];then
+          echo "::error::Not a File: ${{ env.formula }}"
           exit 1
         fi
-        line=$(grep -n -m1 version "${{ env.file }}" | cut -f1 -d:)
-        echo "line: ${line}"
-        sed -i "${line}"'s/.*/  version "${{ inputs.version }}"/' "${{ env.file }}"
-        cat "${{ env.file }}"
+
+        bash "${{ github.action_path }}/src/update-formula.sh" url "${{ inputs.url }}"
+        bash "${{ github.action_path }}/src/update-formula.sh" sha256 "${{ inputs.sha256 }}"
+        bash "${{ github.action_path }}/src/update-formula.sh" version "${{ inputs.version }}"
+
+        echo "::group::cat ${{ env.formula }}"
+        cat -n "${{ env.formula }}"
+        echo "::endgroup::"
+
+    - name: "Job Summary"
+      id: summary
+      working-directory: homebrew-tap
+      shell: bash
+      run: |
+        file="$(basename ${{ env.formula }})"
+        if [ -n "${{ inputs.message }}" ];then
+          message="${{ inputs.message }}" >> "$GITHUB_OUTPUT"
+        elif [ -n "${{ inputs.version }}" ];then
+          message="Bump ${file} to ${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+        else
+          message="Bump ${file}" >> "$GITHUB_OUTPUT"
+        fi
+        echo "message: ${message}"
+        echo "message=${message}" >> "$GITHUB_OUTPUT"
+
+        diff="$(git diff -U0 Formula)"
+        echo "::group::diff"
+        echo "${diff}"
+        echo "::endgroup::"
+
+        file_url="https://github.com/${{ inputs.repo }}/blob/${{ steps.branch.outputs.default }}/Formula/${file}"
+        echo "file_url: ${file_url}"
+
+        md="message: **${message}**\n"
+        md+="formula: [Formula/${file}](${file_url})\n"
+        md+="url: \`${{ inputs.url || 'not updated' }}\`\n"
+        md+="sha256: \`${{ inputs.sha256 || 'not updated' }}\`\n"
+        md+="version: \`${{ inputs.version || 'not updated' }}\`\n"
+        md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
+        echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
     - name: "Commit and Push"
       working-directory: homebrew-tap
       shell: bash
       run: |
-        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        echo "message: ${{ steps.summary.outputs.message }}"
+        echo "name: github-actions[bot]"
+        echo "email: 41898282+github-actions[bot]@users.noreply.github.com"
+
         git config --local user.name "github-actions[bot]"
-        git commit -a -m "Bump ${{ inputs.formula }} to ${{ inputs.version }}"
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git commit -a -m "${{ steps.summary.outputs.message }}"
         git remote set-url origin "https://${{ inputs.token }}@github.com/${{ inputs.repo }}"
-        git push -u origin ${{ inputs.branch }}
+        git push -u origin ${{ steps.branch.outputs.default }}
