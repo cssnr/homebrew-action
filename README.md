@@ -1,4 +1,5 @@
 [![Action Run Using](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcssnr%2Fhomebrew-action%2Frefs%2Fheads%2Fmaster%2Faction.yml&query=%24.runs.using&logo=githubactions&logoColor=white&label=runs)](https://github.com/cssnr/homebrew-action/blob/master/action.yml)
+[![Workflow Test](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/test.yaml?logo=cachet&label=test)](https://github.com/cssnr/homebrew-action/actions/workflows/test.yaml)
 [![Workflow Lint](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/lint.yaml?logo=cachet&label=lint)](https://github.com/cssnr/homebrew-action/actions/workflows/lint.yaml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/cssnr/homebrew-action?logo=github&label=updated)](https://github.com/cssnr/homebrew-action/pulse)
 [![GitHub Repo Size](https://img.shields.io/github/repo-size/cssnr/homebrew-action?logo=bookstack&logoColor=white&label=repo%20size)](https://github.com/cssnr/homebrew-action?tab=readme-ov-file#readme)
@@ -18,16 +19,16 @@
 - [Support](#Support)
 - [Contributing](#Contributing)
 
-Homebrew Action to Update Version.
+🍺 Homebrew Action to Update Formula.
 
-This action is a work-in-progress and may have breaking changes.
+🛠️ This action is a work-in-progress and may have breaking changes.
 
 ```yaml
 - name: 'Homebrew Action'
-  uses: cssnr/homebrew-action@test
+  uses: cssnr/homebrew-action@master
   with:
-    url: # optional
-    sha256: # optional
+    url: https://cssnr.com/#app.zip # optional
+    sha256: 784236d # optional
     version: ${{ github.ref_name }} # optional
     repo: cssnr/homebrew-tap
     formula: toml-run.rb # optional
@@ -36,16 +37,46 @@ This action is a work-in-progress and may have breaking changes.
     token: ${{ secrets.HOMEBREW_PAT }}
 ```
 
-| Input&nbsp;Name |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input        |
-| :-------------- | :-------------------: | :------------------------------------ |
-| `url`           |           -           | URL to Update Too                     |
-| `sha256`        |           -           | SHA256 to Update Too                  |
-| `version`       |           -           | Version to Update Too                 |
-| `repo`          |      _Required_       | Repository `{owner}/{name}`           |
-| `formula`       |   `{repo name}.rb`    | Formula File relative to `Formula`    |
-| `message`       | Bump `{.rb}` to `{v}` | Branch to Checkout/Commit             |
-| `branch`        |   _Default Branch_    | Branch to Checkout/Commit             |
-| `token`         |      _Required_       | Fine Grained or Personal Access Token |
+✅ Only `repo` and `token` are required.
+
+| Input&nbsp;Name |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input |
+| :-------------- | :-------------------: | :----------------------------- |
+| `url`           |           -           | URL to Update                  |
+| `sha256`        |           -           | SHA256 to Update               |
+| `version`       |           -           | Version to Update              |
+| `repo`          |     ⚠️ _Required_     | Repository `{owner}/{name}`    |
+| `formula`       |   `{repo-name}.rb`    | File relative to `Formula`     |
+| `message`       | Bump `{.rb}` to `{v}` | Commit Message                 |
+| `branch`        |   _Default Branch_    | Branch to Checkout/Commit      |
+| `token`         |     ⚠️ _Required_     | Fine Grained or PAT to `repo`  |
+
+You should provide at least one of `url`, `sha256` or `version`.
+
+To see how updates are applied, view: [src/update-formula.sh](src/update-formula.sh)
+
+Example workflow with all inputs.
+
+```yaml
+- name: 'PyPi URL'
+  id: url
+  uses: cssnr/web-request-action@master
+  with:
+    method: 'GET'
+    url: 'https://pypi.org/pypi/toml-run/${{ github.ref_name }}/json'
+    path: '$.urls[?(@.packagetype=="sdist")]'
+
+- name: 'Homebrew Action'
+  uses: cssnr/homebrew-action@master
+  with:
+    url: ${{ fromJSON(steps.url.outputs.result).url }}
+    sha256: ${{ fromJSON(steps.url.outputs.result).digests.sha256 }}
+    version: ${{ github.ref_name }}
+    repo: cssnr/homebrew-tap
+    formula: toml-run.rb # .rb is optional
+    message: Bump toml-run to ${{ github.ref_name }}
+    branch: master
+    token: ${{ secrets.HOMEBREW_PAT }}
+```
 
 # Support
 
