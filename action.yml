@@ -111,8 +111,6 @@ runs:
       shell: bash
       run: |
         file="$(basename ${{ env.formula }})"
-        echo "file: ${file}"
-
         if [ -n "${{ inputs.message }}" ];then
           message="${{ inputs.message }}" >> "$GITHUB_OUTPUT"
         elif [ -n "${{ inputs.version }}" ];then
@@ -120,7 +118,6 @@ runs:
         else
           message="Bump ${file}" >> "$GITHUB_OUTPUT"
         fi
-
         echo "message: ${message}"
         echo "message=${message}" >> "$GITHUB_OUTPUT"
 
@@ -129,10 +126,14 @@ runs:
         echo "${diff}"
         echo "::endgroup::"
 
-        md="Formula: \`Formula/${file}\`\n"
-        md+="URL: \`${{ inputs.url || 'not updated' }}\`\n"
-        md+="SHA256: \`${{ inputs.sha256 || 'not updated' }}\`\n"
-        md+="Version: \`${{ inputs.version || 'not updated' }}\`\n"
+        file_url="https://github.com/${{ inputs.repo }}/blob/${{ steps.branch.outputs.default }}/Formula/${file}"
+        echo "file_url: ${file_url}"
+
+        md="message: **${message}**\n"
+        md+="formula: [Formula/${file}](${file_url})\n"
+        md+="url: \`${{ inputs.url || 'not updated' }}\`\n"
+        md+="sha256: \`${{ inputs.sha256 || 'not updated' }}\`\n"
+        md+="version: \`${{ inputs.version || 'not updated' }}\`\n"
         md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
