@@ -55,6 +55,7 @@ jobs:
           #token: ${{ secrets.HOMEBREW_TEST }}
           app_id: 146360
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          #commit: false
 
       - name: "Validate Outputs"
         uses: cssnr/validate-outputs-action@master

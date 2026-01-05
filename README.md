@@ -57,6 +57,7 @@
 | `token`           |    `GITHUB_TOKEN`     | Access Token for `repo`        |
 | `app_id`          |   _w/ private_key_    | App ID (and private key)       |
 | `app_private_key` |      _w/ app_id_      | App Private Key (and id)       |
+| `commit`          |        `true`         | Commit and Push Changes        |
 
 You must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
