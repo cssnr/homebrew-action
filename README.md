@@ -66,7 +66,7 @@ To see how updates are applied, view the: [src/update-formula.sh](src/update-for
 
 ### Permissions
 
-The default `GITHUB_TOKEN` will not work unless the `repo` is workflow is in the repo.
+The default `GITHUB_TOKEN` will not work unless workflow is in the same `repo` as the tap.
 
 Therefore, you need to create a Personal Access or Fine Grained Access Token.
 
@@ -86,6 +86,7 @@ permissions:
 | formula | Formula file name |
 | message | Commit message    |
 | branch  | Branch used       |
+| sha     | Commit SHA hash   |
 
 ## Examples
 
@@ -120,6 +121,7 @@ Example workflow with all inputs...
     echo "formula: ${{ steps.homebrew.outputs.formula }}"
     echo "message: ${{ steps.homebrew.outputs.message }}"
     echo "branch: ${{ steps.homebrew.outputs.branch }}"
+    echo "sha: ${{ steps.homebrew.outputs.sha }}"
 ```
 
 # Support
