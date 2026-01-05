@@ -145,17 +145,6 @@ runs:
         md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
-    #- uses: EndBug/add-and-commit@v9
-    #  if: ${{ !inputs.app_id }}
-    #  with:
-    #    cwd: homebrew-tap
-    #    author_name: github-actions[bot]
-    #    author_email: 41898282+github-actions[bot]@users.noreply.github.com
-    #    message: ${{ steps.summary.outputs.message }}
-    #    github_token: ${{ inputs.token }}
-    #    default_author: github_actions
-    #    fetch: false
-
     - uses: suzuki-shunsuke/commit-action@v0.0.14
       with:
         root_dir: homebrew-tap
@@ -165,28 +154,3 @@ runs:
         github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
         app_id: ${{ inputs.app_id }}
         app_private_key: ${{ inputs.app_private_key }}
-
-    # NOTE: This action does not support app_id and app_private_key
-    #- name: Commit changes
-    #  uses: iarekylew00t/verified-bot-commit@v2
-    #  with:
-    #    files: Formula/*
-    #    token: ${{ inputs.token }}
-    #    workspace: homebrew-tap
-    #    ref: refs/heads/${{ steps.branch.outputs.default }}
-    #    repository: ${{ inputs.repo }}
-    #    message: ${{ steps.summary.outputs.message }}
-
-    #- name: "Commit and Push"
-    #  working-directory: homebrew-tap
-    #  shell: bash
-    #  run: |
-    #    echo "message: ${{ steps.summary.outputs.message }}"
-    #    echo "name: github-actions[bot]"
-    #    echo "email: 41898282+github-actions[bot]@users.noreply.github.com"
-    #
-    #    git config --local user.name "github-actions[bot]"
-    #    git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-    #    git commit -a -m "${{ steps.summary.outputs.message }}"
-    #    git remote set-url origin "https://${{ inputs.token }}@github.com/${{ inputs.repo }}"
-    #    git push -u origin ${{ steps.branch.outputs.default }}
