@@ -48,9 +48,9 @@
 | `formula`         |   `{repo-name}.rb`    | File relative to `Formula`     |
 | `message`         | Bump `{.rb}` to `{v}` | Commit Message                 |
 | `branch`          |   _Default Branch_    | Branch to Checkout/Commit      |
-| `token`           |   ️ `GITHUB_TOKEN`    | Access Token for `repo`        |
-| `app_id`          |  ️ _w/ private_key_   | App ID (and private key)       |
-| `app_private_key` |     ️ _w/ app_id_     | App Private Key (and id)       |
+| `token`           |    `GITHUB_TOKEN`     | Access Token for `repo`        |
+| `app_id`          |   _w/ private_key_    | App ID (and private key)       |
+| `app_private_key` |      _w/ app_id_      | App Private Key (and id)       |
 
 You must provide a `token` or an `app_id` + `app_private_key`.
 

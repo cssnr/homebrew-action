@@ -44,10 +44,6 @@ jobs:
           echo "::group::Install"
           npm install prettier
           npx prettier --version
-          npx prettier --write .
-          git diff .
-          echo fucking retarded
-          exit 1
           echo "::endgroup::"
           npx prettier --check .
 
