@@ -30,13 +30,13 @@ inputs:
     default: ""
   token:
     description: "Fine Grained or PAT w/ contents: write"
-    required: false
+    default: ""
   app_id:
     description: "App ID"
-    required: true
+    default: ""
   app_private_key:
     description: "App Private Key"
-    required: true
+    default: ""
 
 runs:
   using: "composite"
@@ -143,6 +143,7 @@ runs:
         md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
+    # NOTE: This action does not support verified commits
     #- uses: EndBug/add-and-commit@v9
     #  with:
     #    cwd: homebrew-tap
@@ -159,28 +160,20 @@ runs:
         branch: ${{ steps.branch.outputs.default }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
-        #github_token: ${{ inputs.token }}
+        github_token: ${{ inputs.token }}
         app_id: ${{ inputs.app_id }}
         app_private_key: ${{ inputs.app_private_key }}
 
+    # NOTE: This action does not support app_id and app_private_key
     #- name: Commit changes
     #  uses: iarekylew00t/verified-bot-commit@v2
     #  with:
-    #    files: Formula/${{ inputs.formula }} # TODO: Testing only, can't use inputs.formula
+    #    files: Formula/*
     #    token: ${{ inputs.token }}
     #    workspace: homebrew-tap
     #    ref: refs/heads/${{ steps.branch.outputs.default }}
     #    repository: ${{ inputs.repo }}
     #    message: ${{ steps.summary.outputs.message }}
-
-    #- name: Commit file
-    #  uses: swinton/commit@v2.x
-    #  env:
-    #    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #  with:
-    #    files: ${{ env.formula }}
-    #    commit-message: ${{ steps.summary.outputs.message }}
-    #    ref: refs/heads/${{ steps.branch.outputs.default }}
 
     #- name: "Commit and Push"
     #  working-directory: homebrew-tap

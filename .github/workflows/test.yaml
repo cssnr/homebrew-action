@@ -50,7 +50,7 @@ jobs:
           message: "Bump toml-run.rb to 0.0.${{ github.run_number }}"
           #branch: master
           token: ${{ secrets.HOMEBREW_TEST }}
-          app_id: 2594558
+          app_id: 146360
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       #- name: "Validate Outputs"

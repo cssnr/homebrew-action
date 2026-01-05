@@ -37,20 +37,24 @@
     token: ${{ secrets.HOMEBREW_PAT }}
 ```
 
-✅ Only `repo` and `token` are required.
+✅ Auth with `token` or `app_id`/`app_private_key`.
 
-| Input&nbsp;Name |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input |
-| :-------------- | :-------------------: | :----------------------------- |
-| `url`           |           -           | URL to Update                  |
-| `sha256`        |           -           | SHA256 to Update               |
-| `version`       |           -           | Version to Update              |
-| `repo`          |     ⚠️ _Required_     | Repository `{owner}/{name}`    |
-| `formula`       |   `{repo-name}.rb`    | File relative to `Formula`     |
-| `message`       | Bump `{.rb}` to `{v}` | Commit Message                 |
-| `branch`        |   _Default Branch_    | Branch to Checkout/Commit      |
-| `token`         |     ⚠️ _Required_     | Fine Grained or PAT to `repo`  |
+| Input&nbsp;Name   |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input |
+| :---------------- | :-------------------: | :----------------------------- |
+| `url`             |           -           | URL to Update                  |
+| `sha256`          |           -           | SHA256 to Update               |
+| `version`         |           -           | Version to Update              |
+| `repo`            |     ⚠️ _Required_     | Repository `{owner}/{name}`    |
+| `formula`         |   `{repo-name}.rb`    | File relative to `Formula`     |
+| `message`         | Bump `{.rb}` to `{v}` | Commit Message                 |
+| `branch`          |   _Default Branch_    | Branch to Checkout/Commit      |
+| `token`           |     ️ _or app_id_     | Fine Grained or PAT for `repo` |
+| `app_id`          |     ️ _or token_      | App ID (and private key)       |
+| `app_private_key` |    ️ _for app_id_     | App Private Key (and id)       |
 
-You should provide at least one of `url`, `sha256` or `version`.
+You must provide a `token` or an `app_id` + `app_private_key`.
+
+You should also provide at least one of `url`, `sha256` or `version`.
 
 To see how updates are applied, view: [src/update-formula.sh](src/update-formula.sh)
 
@@ -75,7 +79,8 @@ Example workflow with all inputs.
     formula: toml-run.rb # .rb is optional
     message: Bump toml-run to ${{ github.ref_name }}
     branch: master
-    token: ${{ secrets.HOMEBREW_PAT }}
+    app_id: 146360
+    app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 ```
 
 # Support
