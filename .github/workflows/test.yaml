@@ -50,9 +50,9 @@ jobs:
           #version: ${{ github.ref_name }}
           repo: smashedr/homebrew-test
           formula: toml-run.rb
-          message: Bump toml-run.rb to 0.0.${{ github.run_number }}
+          message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
           #branch: master
-          #token: ${{ secrets.HOMEBREW_PAT }}
+          #token: ${{ secrets.HOMEBREW_TEST }}
           app_id: 146360
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
@@ -62,5 +62,5 @@ jobs:
           outputs: ${{ toJSON(steps.test.outputs) }}
           data: |
             formula: toml-run.rb
-            message: Bump toml-run.rb to 0.0.${{ github.run_number }}
+            message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
             branch: master
