@@ -53,6 +53,8 @@ runs:
         echo "inputs.message: ${{ inputs.message }}"
         echo "inputs.branch: ${{ inputs.branch }}"
 
+        echo "token app logic: ${{ inputs.app_id == '' && inputs.token || '' }}"
+
     - name: "Get Default Branch"
       id: branch
       env:
@@ -160,7 +162,7 @@ runs:
         branch: ${{ steps.branch.outputs.default }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
-        github_token: ${{ inputs.app_id && '' || inputs.token }}
+        github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
         app_id: ${{ inputs.app_id }}
         app_private_key: ${{ inputs.app_private_key }}
 
