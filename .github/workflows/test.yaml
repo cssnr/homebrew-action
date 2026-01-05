@@ -64,3 +64,4 @@ jobs:
             formula: toml-run.rb
             message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
             branch: master
+            sha:
