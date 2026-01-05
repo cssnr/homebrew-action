@@ -5,7 +5,10 @@ name: "Test"
 on:
   workflow_dispatch:
   push:
-    branches-ignore: ["master"]
+    paths:
+      - ".github/workflows/test.yaml"
+      - "action.yml"
+      - "src/update-formula.sh"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

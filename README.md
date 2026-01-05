@@ -79,7 +79,7 @@ Example workflow with all inputs...
     formula: toml-run.rb # .rb is optional
     message: Bump toml-run to ${{ github.ref_name }}
     branch: master
-    app_id: 146360
+    app_id: 123456
     app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 ```
 
