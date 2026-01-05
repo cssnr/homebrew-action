@@ -59,9 +59,9 @@
 | `app_private_key` |      _w/ app_id_      | App Private Key (and id)       |
 | `commit`          |        `true`         | Commit and Push Changes        |
 
-You must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
+You should provide at least one of `url`, `sha256` or `version` to update.
 
-You should also provide at least one of `url`, `sha256` or `version`.
+To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
 To see how updates are applied, view the: [src/update-formula.sh](src/update-formula.sh)
 
