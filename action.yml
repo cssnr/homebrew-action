@@ -6,17 +6,6 @@ branding:
   icon: git-pull-request
   color: "orange"
 
-outputs:
-  formula:
-    description: "Formula File"
-    value: ${{ steps.summary.outputs.formula }}
-  message:
-    description: "Commit Message"
-    value: ${{ steps.summary.outputs.message }}
-  branch:
-    description: "Branch Used"
-    value: ${{ steps.branch.outputs.default }}
-
 inputs:
   url:
     description: "URL to update."
@@ -48,6 +37,23 @@ inputs:
   app_private_key:
     description: "App Private Key"
     default: ""
+  commit:
+    description: "Commit and Push Changes"
+    default: "true"
+
+outputs:
+  formula:
+    description: "Formula File"
+    value: ${{ steps.summary.outputs.formula }}
+  message:
+    description: "Commit Message"
+    value: ${{ steps.summary.outputs.message }}
+  branch:
+    description: "Branch Used"
+    value: ${{ steps.branch.outputs.default }}
+  sha:
+    description: "Commit SHA"
+    value: ${{ steps.commit.outputs.sha }}
 
 runs:
   using: "composite"
@@ -159,6 +165,8 @@ runs:
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
     - name: "Commit Action"
+      if: ${{ inputs.commit == 'true' }}
+      id: commit
       uses: suzuki-shunsuke/commit-action@87b297f0ce551411b43d1880f4fb3cbc60381055 # v0.0.14
       with:
         root_dir: homebrew-tap

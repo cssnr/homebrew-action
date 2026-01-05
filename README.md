@@ -57,16 +57,17 @@
 | `token`           |    `GITHUB_TOKEN`     | Access Token for `repo`        |
 | `app_id`          |   _w/ private_key_    | App ID (and private key)       |
 | `app_private_key` |      _w/ app_id_      | App Private Key (and id)       |
+| `commit`          |        `true`         | Commit and Push Changes        |
 
-You must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
+You should provide at least one of `url`, `sha256` or `version` to update.
 
-You should also provide at least one of `url`, `sha256` or `version`.
+To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
 To see how updates are applied, view the: [src/update-formula.sh](src/update-formula.sh)
 
 ### Permissions
 
-The default `GITHUB_TOKEN` will not work unless the `repo` is workflow is in the repo.
+The default `GITHUB_TOKEN` will not work unless workflow is in the same `repo` as the tap.
 
 Therefore, you need to create a Personal Access or Fine Grained Access Token.
 
@@ -81,11 +82,12 @@ permissions:
 
 ## Outputs
 
-| Output  | Description       |
-| :------ | :---------------- |
-| formula | Formula file name |
-| message | Commit message    |
-| branch  | Branch used       |
+| Output  | Description    |
+| :------ | :------------- |
+| formula | Formula File   |
+| message | Commit Message |
+| branch  | Branch Used    |
+| sha     | Commit SHA     |
 
 ## Examples
 
@@ -120,6 +122,7 @@ Example workflow with all inputs...
     echo "formula: ${{ steps.homebrew.outputs.formula }}"
     echo "message: ${{ steps.homebrew.outputs.message }}"
     echo "branch: ${{ steps.homebrew.outputs.branch }}"
+    echo "sha: ${{ steps.homebrew.outputs.sha }}"
 ```
 
 # Support

@@ -48,13 +48,14 @@ jobs:
           url: "https://example.com/toml_run-0.0.${{ github.run_number }}.tar.gz"
           sha256: "abcd1234${{ github.run_number }}"
           #version: ${{ github.ref_name }}
-          repo: cssnr/homebrew-test
+          repo: smashedr/homebrew-test
           formula: toml-run.rb
-          message: Bump toml-run.rb to 0.0.${{ github.run_number }}
+          message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
           #branch: master
-          #token: ${{ secrets.HOMEBREW_PAT }}
+          #token: ${{ secrets.HOMEBREW_TEST }}
           app_id: 146360
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          #commit: false
 
       - name: "Validate Outputs"
         uses: cssnr/validate-outputs-action@master
@@ -62,5 +63,6 @@ jobs:
           outputs: ${{ toJSON(steps.test.outputs) }}
           data: |
             formula: toml-run.rb
-            message: Bump toml-run.rb to 0.0.${{ github.run_number }}
+            message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
             branch: master
+            sha:
