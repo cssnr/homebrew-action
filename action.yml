@@ -140,7 +140,7 @@ runs:
         echo "message: ${message}"
         echo "message=${message}" >> "$GITHUB_OUTPUT"
 
-        echo "formula=${{ env.formula }}" >> "$GITHUB_OUTPUT"
+        echo "formula=${file}" >> "$GITHUB_OUTPUT"
 
         diff="$(git diff -U0 Formula)"
         echo "::group::diff"

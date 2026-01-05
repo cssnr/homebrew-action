@@ -61,6 +61,6 @@ jobs:
         with:
           outputs: ${{ toJSON(steps.test.outputs) }}
           data: |
-            formula: Formula/toml-run.rb
+            formula: toml-run.rb
             message: Bump toml-run.rb to 0.0.${{ github.run_number }}
             branch: master
