@@ -16,10 +16,16 @@
 <a title="Homebrew Action" href="https://actions.cssnr.com/" target="_blank">
 <img alt="Homebrew Action" align="right" width="128" height="auto" src="https://raw.githubusercontent.com/cssnr/homebrew-action/refs/heads/master/.github/assets/logo.svg"></a>
 
+- [Inputs](#Inputs)
+  - [Permissions](#Permissions)
+- [Outputs](#Outputs)
+- [Examples](#Examples)
 - [Support](#Support)
 - [Contributing](#Contributing)
 
 🍺 Homebrew Action to Update Formula.
+
+✅ Auth with `token` or `app_id`/`app_private_key`.
 
 🛠️ This action is a work-in-progress and may have breaking changes.
 
@@ -37,7 +43,7 @@
     token: ${{ secrets.HOMEBREW_PAT }}
 ```
 
-✅ Auth with `token` or `app_id`/`app_private_key`.
+## Inputs
 
 | Input&nbsp;Name   |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input |
 | :---------------- | :-------------------: | :----------------------------- |
@@ -52,11 +58,36 @@
 | `app_id`          |   _w/ private_key_    | App ID (and private key)       |
 | `app_private_key` |      _w/ app_id_      | App Private Key (and id)       |
 
-You must provide a `token` or an `app_id` + `app_private_key`.
+You must provide a `token` or an `app_id` + `app_private_key`. See [Permissions](#permissions).
 
 You should also provide at least one of `url`, `sha256` or `version`.
 
 To see how updates are applied, view: [src/update-formula.sh](src/update-formula.sh)
+
+### Permissions
+
+The default `GITHUB_TOKEN` will not work unless the `repo` is the same.
+
+Therefore, you need to create a Personal Access or Fine Grained Access Token.
+
+Alternatively, you can use a GitHub App ID and Private Key with the same access.
+
+In all cases, you need `contents: write`.
+
+```yaml
+permissions:
+  contents: write
+```
+
+## Outputs
+
+| Output  | Description    |
+| :------ | :------------- |
+| formula | Formula File   |
+| message | Commit Message |
+| branch  | Branch Used    |
+
+## Examples
 
 Example workflow with all inputs...
 

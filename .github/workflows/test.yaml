@@ -50,15 +50,17 @@ jobs:
           #version: ${{ github.ref_name }}
           repo: cssnr/homebrew-test
           formula: toml-run.rb
-          message: "Bump toml-run.rb to 0.0.${{ github.run_number }}"
+          message: Bump toml-run.rb to 0.0.${{ github.run_number }}
           #branch: master
           #token: ${{ secrets.HOMEBREW_PAT }}
           app_id: 146360
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      #- name: "Validate Outputs"
-      #  uses: cssnr/validate-outputs-action@master
-      #  with:
-      #    outputs: ${{ toJSON(steps.test.outputs) }}
-      #    data: |
-      #      download_url:
+      - name: "Validate Outputs"
+        uses: cssnr/validate-outputs-action@master
+        with:
+          outputs: ${{ toJSON(steps.test.outputs) }}
+          data: |
+            formula: Formula/toml-run.rb
+            message: Bump toml-run.rb to 0.0.${{ github.run_number }}
+            branch: master

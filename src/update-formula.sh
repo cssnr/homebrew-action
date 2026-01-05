@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# https://github.com/cssnr/homebrew-action
 
 set -e
 

@@ -6,6 +6,17 @@ branding:
   icon: git-pull-request
   color: "orange"
 
+outputs:
+  formula:
+    description: "Formula File"
+    value: ${{ steps.summary.outputs.formula }}
+  message:
+    description: "Commit Message"
+    value: ${{ steps.summary.outputs.message }}
+  branch:
+    description: "Branch Used"
+    value: ${{ steps.branch.outputs.default }}
+
 inputs:
   url:
     description: "URL to update."
@@ -53,7 +64,7 @@ runs:
         echo "inputs.message: ${{ inputs.message }}"
         echo "inputs.branch: ${{ inputs.branch }}"
 
-        echo "token app logic: ${{ inputs.app_id == '' && inputs.token || '' }}"
+        echo "inputs.app_id: ${{ inputs.app_id }}"
 
     - name: "Get Default Branch"
       id: branch
@@ -77,7 +88,7 @@ runs:
         ref: ${{ steps.branch.outputs.default }}
         repository: ${{ inputs.repo }}
 
-    - name: "Set Formula File"
+    - name: "Get Formula File"
       env:
         path: homebrew-tap/Formula
       shell: bash
@@ -129,6 +140,8 @@ runs:
         echo "message: ${message}"
         echo "message=${message}" >> "$GITHUB_OUTPUT"
 
+        echo "formula=${{ env.formula }}" >> "$GITHUB_OUTPUT"
+
         diff="$(git diff -U0 Formula)"
         echo "::group::diff"
         echo "${diff}"
@@ -145,7 +158,8 @@ runs:
         md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
-    - uses: suzuki-shunsuke/commit-action@v0.0.14
+    - name: "Commit Action"
+      uses: suzuki-shunsuke/commit-action@87b297f0ce551411b43d1880f4fb3cbc60381055 # v0.0.14
       with:
         root_dir: homebrew-tap
         branch: ${{ steps.branch.outputs.default }}
