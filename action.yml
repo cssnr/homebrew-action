@@ -30,6 +30,12 @@ inputs:
     default: ""
   token:
     description: "Fine Grained or PAT w/ contents: write"
+    required: false
+  app_id:
+    description: "App ID"
+    required: true
+  app_private_key:
+    description: "App Private Key"
     required: true
 
 runs:
@@ -154,8 +160,8 @@ runs:
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
         #github_token: ${{ inputs.token }}
-        app_id: 2594558
-        app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+        app_id: ${{ inputs.app_id }}
+        app_private_key: ${{ inputs.app_private_key }}
 
     #- name: Commit changes
     #  uses: iarekylew00t/verified-bot-commit@v2
