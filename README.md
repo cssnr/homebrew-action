@@ -58,7 +58,7 @@ You should also provide at least one of `url`, `sha256` or `version`.
 
 To see how updates are applied, view: [src/update-formula.sh](src/update-formula.sh)
 
-Example workflow with all inputs.
+Example workflow with all inputs...
 
 ```yaml
 - name: 'PyPi URL'
