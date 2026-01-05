@@ -163,7 +163,7 @@ runs:
         branch: ${{ steps.branch.outputs.default }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
-        #github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
+        github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
         app_id: ${{ inputs.app_id }}
         app_private_key: ${{ inputs.app_private_key }}
 
@@ -178,16 +178,16 @@ runs:
     #    repository: ${{ inputs.repo }}
     #    message: ${{ steps.summary.outputs.message }}
 
-    - name: "Commit and Push"
-      working-directory: homebrew-tap
-      shell: bash
-      run: |
-        echo "message: ${{ steps.summary.outputs.message }}"
-        echo "name: github-actions[bot]"
-        echo "email: 41898282+github-actions[bot]@users.noreply.github.com"
-
-        git config --local user.name "github-actions[bot]"
-        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git commit -a -m "${{ steps.summary.outputs.message }}"
-        git remote set-url origin "https://${{ inputs.token }}@github.com/${{ inputs.repo }}"
-        git push -u origin ${{ steps.branch.outputs.default }}
+    #- name: "Commit and Push"
+    #  working-directory: homebrew-tap
+    #  shell: bash
+    #  run: |
+    #    echo "message: ${{ steps.summary.outputs.message }}"
+    #    echo "name: github-actions[bot]"
+    #    echo "email: 41898282+github-actions[bot]@users.noreply.github.com"
+    #
+    #    git config --local user.name "github-actions[bot]"
+    #    git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    #    git commit -a -m "${{ steps.summary.outputs.message }}"
+    #    git remote set-url origin "https://${{ inputs.token }}@github.com/${{ inputs.repo }}"
+    #    git push -u origin ${{ steps.branch.outputs.default }}
