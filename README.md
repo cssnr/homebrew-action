@@ -81,12 +81,12 @@ permissions:
 
 ## Outputs
 
-| Output  | Description       |
-| :------ | :---------------- |
-| formula | Formula file name |
-| message | Commit message    |
-| branch  | Branch used       |
-| sha     | Commit SHA hash   |
+| Output  | Description    |
+| :------ | :------------- |
+| formula | Formula File   |
+| message | Commit Message |
+| branch  | Branch Used    |
+| sha     | Commit SHA     |
 
 ## Examples
 
