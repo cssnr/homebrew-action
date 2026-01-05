@@ -145,24 +145,25 @@ runs:
         md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
-    # NOTE: This action does not support verified commits
-    #- uses: EndBug/add-and-commit@v9
-    #  with:
-    #    cwd: homebrew-tap
-    #    author_name: github-actions[bot]
-    #    author_email: 41898282+github-actions[bot]@users.noreply.github.com
-    #    message: ${{ steps.summary.outputs.message }}
-    #    github_token: ${{ inputs.token }}
-    #    default_author: github_actions
-    #    fetch: false
+    - uses: EndBug/add-and-commit@v9
+      if: ${{ !inputs.app_id }}
+      with:
+        cwd: homebrew-tap
+        author_name: github-actions[bot]
+        author_email: 41898282+github-actions[bot]@users.noreply.github.com
+        message: ${{ steps.summary.outputs.message }}
+        github_token: ${{ inputs.token }}
+        default_author: github_actions
+        fetch: false
 
     - uses: suzuki-shunsuke/commit-action@v0.0.14
+      if: ${{ inputs.app_id }}
       with:
         root_dir: homebrew-tap
         branch: ${{ steps.branch.outputs.default }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
-        github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
+        #github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
         app_id: ${{ inputs.app_id }}
         app_private_key: ${{ inputs.app_private_key }}
 
