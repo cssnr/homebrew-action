@@ -4,8 +4,11 @@ name: "Test"
 
 on:
   workflow_dispatch:
-  #push:
-  #  branches: ["**"]
+  push:
+    paths:
+      - ".github/workflows/test.yaml"
+      - "action.yml"
+      - "src/update-formula.sh"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,15 +48,19 @@ jobs:
           url: "https://example.com/toml_run-0.0.${{ github.run_number }}.tar.gz"
           sha256: "abcd1234${{ github.run_number }}"
           #version: ${{ github.ref_name }}
-          repo: smashedr/homebrew-test
+          repo: cssnr/homebrew-test
           formula: toml-run.rb
-          message: "Bump toml-run.rb to 0.0.${{ github.run_number }}"
+          message: Bump toml-run.rb to 0.0.${{ github.run_number }}
           #branch: master
-          token: ${{ secrets.HOMEBREW_TEST }}
+          #token: ${{ secrets.HOMEBREW_PAT }}
+          app_id: 146360
+          app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      #- name: "Validate Outputs"
-      #  uses: cssnr/validate-outputs-action@master
-      #  with:
-      #    outputs: ${{ toJSON(steps.test.outputs) }}
-      #    data: |
-      #      download_url:
+      - name: "Validate Outputs"
+        uses: cssnr/validate-outputs-action@master
+        with:
+          outputs: ${{ toJSON(steps.test.outputs) }}
+          data: |
+            formula: toml-run.rb
+            message: Bump toml-run.rb to 0.0.${{ github.run_number }}
+            branch: master

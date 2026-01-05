@@ -16,10 +16,16 @@
 <a title="Homebrew Action" href="https://actions.cssnr.com/" target="_blank">
 <img alt="Homebrew Action" align="right" width="128" height="auto" src="https://raw.githubusercontent.com/cssnr/homebrew-action/refs/heads/master/.github/assets/logo.svg"></a>
 
+- [Inputs](#Inputs)
+  - [Permissions](#Permissions)
+- [Outputs](#Outputs)
+- [Examples](#Examples)
 - [Support](#Support)
 - [Contributing](#Contributing)
 
-🍺 Homebrew Action to Update Formula.
+🍺 Homebrew Action to Update Formula `url`, `version` and `sha256`.
+
+✅ Auth with `token` or `app_id`/`app_private_key` for Verified commits.
 
 🛠️ This action is a work-in-progress and may have breaking changes.
 
@@ -28,33 +34,62 @@
   uses: cssnr/homebrew-action@master
   with:
     url: https://cssnr.com/#app.zip # optional
-    sha256: 784236d # optional
+    sha256: a6c550e966e63fc3a296f11 # optional
     version: ${{ github.ref_name }} # optional
     repo: cssnr/homebrew-tap
     formula: toml-run.rb # optional
     message: Bump toml-run # optional
     branch: master # optional
-    token: ${{ secrets.HOMEBREW_PAT }}
+    token: ${{ secrets.HOMEBREW_PAT }} # or app_id
 ```
 
-✅ Only `repo` and `token` are required.
+## Inputs
 
-| Input&nbsp;Name |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input |
-| :-------------- | :-------------------: | :----------------------------- |
-| `url`           |           -           | URL to Update                  |
-| `sha256`        |           -           | SHA256 to Update               |
-| `version`       |           -           | Version to Update              |
-| `repo`          |     ⚠️ _Required_     | Repository `{owner}/{name}`    |
-| `formula`       |   `{repo-name}.rb`    | File relative to `Formula`     |
-| `message`       | Bump `{.rb}` to `{v}` | Commit Message                 |
-| `branch`        |   _Default Branch_    | Branch to Checkout/Commit      |
-| `token`         |     ⚠️ _Required_     | Fine Grained or PAT to `repo`  |
+| Input&nbsp;Name   |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input |
+| :---------------- | :-------------------: | :----------------------------- |
+| `url`             |           -           | URL to Update                  |
+| `sha256`          |           -           | SHA256 to Update               |
+| `version`         |           -           | Version to Update              |
+| `repo`            |     ⚠️ _Required_     | Repository `{owner}/{name}`    |
+| `formula`         |   `{repo-name}.rb`    | File relative to `Formula`     |
+| `message`         | Bump `{.rb}` to `{v}` | Commit Message                 |
+| `branch`          |   _Default Branch_    | Branch to Checkout/Commit      |
+| `token`           |    `GITHUB_TOKEN`     | Access Token for `repo`        |
+| `app_id`          |   _w/ private_key_    | App ID (and private key)       |
+| `app_private_key` |      _w/ app_id_      | App Private Key (and id)       |
 
-You should provide at least one of `url`, `sha256` or `version`.
+You must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
-To see how updates are applied, view: [src/update-formula.sh](src/update-formula.sh)
+You should also provide at least one of `url`, `sha256` or `version`.
 
-Example workflow with all inputs.
+To see how updates are applied, view the: [src/update-formula.sh](src/update-formula.sh)
+
+### Permissions
+
+The default `GITHUB_TOKEN` will not work unless the `repo` is workflow is in the repo.
+
+Therefore, you need to create a Personal Access or Fine Grained Access Token.
+
+Alternatively, you can create and use a GitHub App ID and Private Key.
+
+**In all cases, you need `contents: write`.**
+
+```yaml
+permissions:
+  contents: write
+```
+
+## Outputs
+
+| Output  | Description       |
+| :------ | :---------------- |
+| formula | Formula file name |
+| message | Commit message    |
+| branch  | Branch used       |
+
+## Examples
+
+Example workflow with all inputs...
 
 ```yaml
 - name: 'PyPi URL'
@@ -66,6 +101,7 @@ Example workflow with all inputs.
     path: '$.urls[?(@.packagetype=="sdist")]'
 
 - name: 'Homebrew Action'
+  id: homebrew
   uses: cssnr/homebrew-action@master
   with:
     url: ${{ fromJSON(steps.url.outputs.result).url }}
@@ -75,7 +111,15 @@ Example workflow with all inputs.
     formula: toml-run.rb # .rb is optional
     message: Bump toml-run to ${{ github.ref_name }}
     branch: master
-    token: ${{ secrets.HOMEBREW_PAT }}
+    app_id: 12345678
+    app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+- name: 'Debug Outputs'
+  continue-on-error: true
+  run: |
+    echo "formula: ${{ steps.homebrew.outputs.formula }}"
+    echo "message: ${{ steps.homebrew.outputs.message }}"
+    echo "branch: ${{ steps.homebrew.outputs.branch }}"
 ```
 
 # Support

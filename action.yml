@@ -6,6 +6,17 @@ branding:
   icon: git-pull-request
   color: "orange"
 
+outputs:
+  formula:
+    description: "Formula File"
+    value: ${{ steps.summary.outputs.formula }}
+  message:
+    description: "Commit Message"
+    value: ${{ steps.summary.outputs.message }}
+  branch:
+    description: "Branch Used"
+    value: ${{ steps.branch.outputs.default }}
+
 inputs:
   url:
     description: "URL to update."
@@ -30,7 +41,13 @@ inputs:
     default: ""
   token:
     description: "Fine Grained or PAT w/ contents: write"
-    required: true
+    default: ${{ github.token }}
+  app_id:
+    description: "App ID"
+    default: ""
+  app_private_key:
+    description: "App Private Key"
+    default: ""
 
 runs:
   using: "composite"
@@ -46,6 +63,8 @@ runs:
         echo "inputs.formula: ${{ inputs.formula }}"
         echo "inputs.message: ${{ inputs.message }}"
         echo "inputs.branch: ${{ inputs.branch }}"
+
+        echo "inputs.app_id: ${{ inputs.app_id }}"
 
     - name: "Get Default Branch"
       id: branch
@@ -69,7 +88,7 @@ runs:
         ref: ${{ steps.branch.outputs.default }}
         repository: ${{ inputs.repo }}
 
-    - name: "Set Formula File"
+    - name: "Get Formula File"
       env:
         path: homebrew-tap/Formula
       shell: bash
@@ -121,6 +140,8 @@ runs:
         echo "message: ${message}"
         echo "message=${message}" >> "$GITHUB_OUTPUT"
 
+        echo "formula=${file}" >> "$GITHUB_OUTPUT"
+
         diff="$(git diff -U0 Formula)"
         echo "::group::diff"
         echo "${diff}"
@@ -137,16 +158,13 @@ runs:
         md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
-    - name: "Commit and Push"
-      working-directory: homebrew-tap
-      shell: bash
-      run: |
-        echo "message: ${{ steps.summary.outputs.message }}"
-        echo "name: github-actions[bot]"
-        echo "email: 41898282+github-actions[bot]@users.noreply.github.com"
-
-        git config --local user.name "github-actions[bot]"
-        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git commit -a -m "${{ steps.summary.outputs.message }}"
-        git remote set-url origin "https://${{ inputs.token }}@github.com/${{ inputs.repo }}"
-        git push -u origin ${{ steps.branch.outputs.default }}
+    - name: "Commit Action"
+      uses: suzuki-shunsuke/commit-action@87b297f0ce551411b43d1880f4fb3cbc60381055 # v0.0.14
+      with:
+        root_dir: homebrew-tap
+        branch: ${{ steps.branch.outputs.default }}
+        repository: ${{ inputs.repo }}
+        commit_message: ${{ steps.summary.outputs.message }}
+        github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
+        app_id: ${{ inputs.app_id }}
+        app_private_key: ${{ inputs.app_private_key }}
