@@ -157,7 +157,6 @@ runs:
     #    fetch: false
 
     - uses: suzuki-shunsuke/commit-action@v0.0.14
-      #if: ${{ inputs.app_id }}
       with:
         root_dir: homebrew-tap
         branch: ${{ steps.branch.outputs.default }}
