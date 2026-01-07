@@ -34,32 +34,43 @@
   uses: cssnr/homebrew-action@master
   with:
     url: https://cssnr.com/#app.zip # optional
-    sha256: a6c550e966e63fc3a296f11 # optional
+    sha256: a6c550e966e # calculated from url
     version: ${{ github.ref_name }} # optional
-    repo: cssnr/homebrew-tap
+    calculate: true # true is default, optional
+    repo: cssnr/homebrew-tap # set to your tap
     formula: toml-run.rb # optional
     message: Bump toml-run # optional
     branch: master # optional
     token: ${{ secrets.HOMEBREW_PAT }} # or app_id
+    commit: true # true is default, optional
 ```
+
+For more workflow examples, see the [Examples](#examples) section.
+
+For an example Tap, see my tap: <https://github.com/cssnr/homebrew-tap>
+
+To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](https://github.com/cssnr/homebrew-tap/blob/master/.github/workflows/test.yaml)
 
 ## Inputs
 
-| Input&nbsp;Name   |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input |
-| :---------------- | :-------------------: | :----------------------------- |
-| `url`             |           -           | URL to Update                  |
-| `sha256`          |           -           | SHA256 to Update               |
-| `version`         |           -           | Version to Update              |
-| `repo`            |     ⚠️ _Required_     | Repository `{owner}/{name}`    |
-| `formula`         |   `{repo-name}.rb`    | File relative to `Formula`     |
-| `message`         | Bump `{.rb}` to `{v}` | Commit Message                 |
-| `branch`          |   _Default Branch_    | Branch to Checkout/Commit      |
-| `token`           |    `GITHUB_TOKEN`     | Access Token for `repo`        |
-| `app_id`          |   _w/ private_key_    | App ID (and private key)       |
-| `app_private_key` |      _w/ app_id_      | App Private Key (and id)       |
-| `commit`          |        `true`         | Commit and Push Changes        |
+| Input&nbsp;Name   |   Default&nbsp;Value    | Description&nbsp;of&nbsp;Input |
+| :---------------- | :---------------------: | :----------------------------- |
+| `url`             |            -            | Formula URL to update          |
+| `sha256`          | _calculated from `url`_ | Formula Hash to update         |
+| `version`         |            -            | Formula Version to update      |
+| `calculate`       |         `true`          | Calculate `sha256` from `url`  |
+| `repo`            |      ⚠️ _Required_      | Repository `{owner}/{name}`    |
+| `formula`         |    `{repo-name}.rb`     | File relative to `Formula`     |
+| `message`         |  Bump `{.rb}` to `{v}`  | Commit Message                 |
+| `branch`          |    _Default Branch_     | Branch to Checkout/Commit      |
+| `token`           |     `GITHUB_TOKEN`      | Access Token for `repo`        |
+| `app_id`          |    _w/ private_key_     | App ID (and private key)       |
+| `app_private_key` |       _w/ app_id_       | App Private Key (and id)       |
+| `commit`          |         `true`          | Commit and Push Changes        |
 
 You should provide at least one of `url`, `sha256` or `version` to update.
+
+The `sha256` is calculated from the `url` unless the `sha256` is provided or `calculate` is set to `false`.
 
 To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
@@ -87,16 +98,52 @@ permissions:
 | formula | Formula File   |
 | message | Commit Message |
 | branch  | Branch Used    |
-| sha     | Commit SHA     |
+| sha256  | Formula Hash   |
+| sha     | Commit Hash    |
 
 ## Examples
 
-Example workflow with all inputs...
+Minimal with provided URL.
 
 ```yaml
-- name: 'PyPi URL'
-  id: url
-  uses: cssnr/web-request-action@master
+- name: 'Homebrew Action'
+  id: homebrew
+  uses: cssnr/homebrew-action@master
+  with:
+    url: https://... # used to calculate the sha256
+    repo: cssnr/homebrew-tap
+    token: ${{ secrets.REPO_TOKEN }}
+```
+
+Update from a GitHub Release.
+
+```yaml
+- name: 'Upload Release'
+  id: release
+  uses: cssnr/upload-release-action@v1
+  with:
+    files: dist/asset.zip
+
+- name: 'Homebrew Action'
+  uses: cssnr/homebrew-action@master
+  with:
+    url: ${{ fromJSON(steps.release.outputs.assets)[1].browser_download_url }}
+    sha256: ${{ fromJSON(steps.release.outputs.assets)[1].digest }}
+    version: ${{ github.ref_name }} # only set if you use version
+    repo: cssnr/homebrew-tap
+    formula: get-contributors.rb # .rb is optional
+    message: Bump get-contributors.rb to ${{ github.ref_name }}
+    branch: master
+    app_id: 146360
+    app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+```
+
+Update from a PyPi Release.
+
+```yaml
+- name: 'PyPi Request'
+  id: request
+  uses: cssnr/web-request-action@v2
   with:
     method: 'GET'
     url: 'https://pypi.org/pypi/toml-run/${{ github.ref_name }}/json'
@@ -106,9 +153,9 @@ Example workflow with all inputs...
   id: homebrew
   uses: cssnr/homebrew-action@master
   with:
-    url: ${{ fromJSON(steps.url.outputs.result).url }}
-    sha256: ${{ fromJSON(steps.url.outputs.result).digests.sha256 }}
-    version: ${{ github.ref_name }}
+    url: ${{ fromJSON(steps.request.outputs.result).url }}
+    sha256: ${{ fromJSON(steps.request.outputs.result).digests.sha256 }}
+    version: ${{ github.ref_name }} # only set if you use version
     repo: cssnr/homebrew-tap
     formula: toml-run.rb # .rb is optional
     message: Bump toml-run to ${{ github.ref_name }}
@@ -116,14 +163,18 @@ Example workflow with all inputs...
     app_id: 12345678
     app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-- name: 'Debug Outputs'
+- name: 'Echo Outputs'
   continue-on-error: true
   run: |
     echo "formula: ${{ steps.homebrew.outputs.formula }}"
     echo "message: ${{ steps.homebrew.outputs.message }}"
     echo "branch: ${{ steps.homebrew.outputs.branch }}"
+    echo "sha256: ${{ steps.homebrew.outputs.sha256 }}"
     echo "sha: ${{ steps.homebrew.outputs.sha }}"
 ```
+
+For more examples, check out other projects using this action:  
+<https://github.com/cssnr/homebrew-action/network/dependents>
 
 # Support
 
@@ -136,7 +187,7 @@ If you are experiencing an issue/bug or getting unexpected results, you can:
 
 - Report an Issue: https://github.com/cssnr/homebrew-action/issues
 - Chat with us on Discord: https://discord.gg/wXy6m2X8wY
-- Provide General Feedback: [https://cssnr.github.io/feedback/](https://cssnr.github.io/feedback/?app=Update%20Release%20Notes)
+- Provide General Feedback: [https://cssnr.github.io/feedback/](https://cssnr.github.io/feedback/?app=Homebrew%20Action)
 
 For more information, see the CSSNR [SUPPORT.md](https://github.com/cssnr/.github/blob/master/.github/SUPPORT.md#support).
 
