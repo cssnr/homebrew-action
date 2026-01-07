@@ -45,9 +45,9 @@ jobs:
         id: test
         uses: ./
         with:
-          #url: "https://example.com/toml_run-0.0.${{ github.run_number }}.tar.gz"
-          url: "https://github.com/cssnr/vitepress-plugin-contributors/releases/download/0.0.5/get-contributors.js"
-          #sha256: "abc123${{ github.run_number }}"
+          url: "https://example.com/toml_run-0.0.${{ github.run_number }}.tar.gz"
+          #url: "https://github.com/cssnr/vitepress-plugin-contributors/releases/download/0.0.5/get-contributors.js"
+          sha256: "abc123${{ github.run_number }}"
           #version: ${{ github.ref_name }}
           repo: smashedr/homebrew-test
           formula: toml-run.rb
@@ -66,5 +66,6 @@ jobs:
             formula: toml-run.rb
             message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
             branch: master
-            sha256: sha256:9309a179f2440f0ea576e31031e87f2c9eda26bc72f5eb5f9924463e75a06ec1
+            sha256: "abc123${{ github.run_number }}"
+            #sha256: 9309a179f2440f0ea576e31031e87f2c9eda26bc72f5eb5f9924463e75a06ec1
             sha:
