@@ -45,6 +45,10 @@
     commit: true # true is default, optional
 ```
 
+For an example Tap, see my tap: <https://github.com/cssnr/homebrew-tap>
+
+To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](https://github.com/cssnr/homebrew-tap/blob/master/.github/workflows/test.yaml)
+
 ## Inputs
 
 | Input&nbsp;Name   |   Default&nbsp;Value    | Description&nbsp;of&nbsp;Input |
@@ -121,7 +125,7 @@ Update from a GitHub Release.
   with:
     url: ${{ fromJSON(steps.release.outputs.assets)[1].browser_download_url }}
     sha256: ${{ fromJSON(steps.release.outputs.assets)[1].digest }}
-    version: ${{ github.ref_name }}
+    version: ${{ github.ref_name }} # only set if you use version
     repo: cssnr/homebrew-tap
     formula: get-contributors.rb # .rb is optional
     message: Bump get-contributors.rb to ${{ github.ref_name }}
@@ -147,7 +151,7 @@ Update from a PyPi Release.
   with:
     url: ${{ fromJSON(steps.request.outputs.result).url }}
     sha256: ${{ fromJSON(steps.request.outputs.result).digests.sha256 }}
-    version: ${{ github.ref_name }}
+    version: ${{ github.ref_name }} # only set if you use version
     repo: cssnr/homebrew-tap
     formula: toml-run.rb # .rb is optional
     message: Bump toml-run to ${{ github.ref_name }}
@@ -165,6 +169,9 @@ Update from a PyPi Release.
     echo "sha: ${{ steps.homebrew.outputs.sha }}"
 ```
 
+For more examples, check out other projects using this action:  
+<https://github.com/cssnr/homebrew-action/network/dependents>
+
 # Support
 
 For general help or to request a feature, see:
@@ -176,7 +183,7 @@ If you are experiencing an issue/bug or getting unexpected results, you can:
 
 - Report an Issue: https://github.com/cssnr/homebrew-action/issues
 - Chat with us on Discord: https://discord.gg/wXy6m2X8wY
-- Provide General Feedback: [https://cssnr.github.io/feedback/](https://cssnr.github.io/feedback/?app=Update%20Release%20Notes)
+- Provide General Feedback: [https://cssnr.github.io/feedback/](https://cssnr.github.io/feedback/?app=Homebrew%20Action)
 
 For more information, see the CSSNR [SUPPORT.md](https://github.com/cssnr/.github/blob/master/.github/SUPPORT.md#support).
 
