@@ -34,7 +34,7 @@
   uses: cssnr/homebrew-action@master
   with:
     url: https://cssnr.com/#app.zip # optional
-    sha256: a6c550e966e63fc3a296f11 # optional
+    sha256: a6c550e966e # calculated from url
     version: ${{ github.ref_name }} # optional
     repo: cssnr/homebrew-tap
     formula: toml-run.rb # optional
@@ -45,19 +45,20 @@
 
 ## Inputs
 
-| Input&nbsp;Name   |  Default&nbsp;Value   | Description&nbsp;of&nbsp;Input |
-| :---------------- | :-------------------: | :----------------------------- |
-| `url`             |           -           | URL to Update                  |
-| `sha256`          |           -           | SHA256 to Update               |
-| `version`         |           -           | Version to Update              |
-| `repo`            |     ⚠️ _Required_     | Repository `{owner}/{name}`    |
-| `formula`         |   `{repo-name}.rb`    | File relative to `Formula`     |
-| `message`         | Bump `{.rb}` to `{v}` | Commit Message                 |
-| `branch`          |   _Default Branch_    | Branch to Checkout/Commit      |
-| `token`           |    `GITHUB_TOKEN`     | Access Token for `repo`        |
-| `app_id`          |   _w/ private_key_    | App ID (and private key)       |
-| `app_private_key` |      _w/ app_id_      | App Private Key (and id)       |
-| `commit`          |        `true`         | Commit and Push Changes        |
+| Input&nbsp;Name   |   Default&nbsp;Value    | Description&nbsp;of&nbsp;Input |
+| :---------------- | :---------------------: | :----------------------------- |
+| `url`             |            -            | Formula URL to update          |
+| `sha256`          | _calculated from `url`_ | Formula Hash to update         |
+| `version`         |            -            | Formula Version to update      |
+| `calculate`       |         `true`          | Calculate `sha256` from `url`  |
+| `repo`            |      ⚠️ _Required_      | Repository `{owner}/{name}`    |
+| `formula`         |    `{repo-name}.rb`     | File relative to `Formula`     |
+| `message`         |  Bump `{.rb}` to `{v}`  | Commit Message                 |
+| `branch`          |    _Default Branch_     | Branch to Checkout/Commit      |
+| `token`           |     `GITHUB_TOKEN`      | Access Token for `repo`        |
+| `app_id`          |    _w/ private_key_     | App ID (and private key)       |
+| `app_private_key` |       _w/ app_id_       | App Private Key (and id)       |
+| `commit`          |         `true`          | Commit and Push Changes        |
 
 You should provide at least one of `url`, `sha256` or `version` to update.
 
@@ -87,7 +88,8 @@ permissions:
 | formula | Formula File   |
 | message | Commit Message |
 | branch  | Branch Used    |
-| sha     | Commit SHA     |
+| sha256  | Formula Hash   |
+| sha     | Commit Hash    |
 
 ## Examples
 
@@ -122,6 +124,7 @@ Example workflow with all inputs...
     echo "formula: ${{ steps.homebrew.outputs.formula }}"
     echo "message: ${{ steps.homebrew.outputs.message }}"
     echo "branch: ${{ steps.homebrew.outputs.branch }}"
+    echo "sha256: ${{ steps.homebrew.outputs.sha256 }}"
     echo "sha: ${{ steps.homebrew.outputs.sha }}"
 ```
 

@@ -46,7 +46,7 @@ jobs:
         uses: ./
         with:
           url: "https://example.com/toml_run-0.0.${{ github.run_number }}.tar.gz"
-          sha256: "abcd1234${{ github.run_number }}"
+          sha256: "abc123${{ github.run_number }}"
           #version: ${{ github.ref_name }}
           repo: smashedr/homebrew-test
           formula: toml-run.rb
@@ -65,4 +65,5 @@ jobs:
             formula: toml-run.rb
             message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
             branch: master
+            sha256: abc123${{ github.run_number }}
             sha:

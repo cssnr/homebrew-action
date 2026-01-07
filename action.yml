@@ -8,14 +8,17 @@ branding:
 
 inputs:
   url:
-    description: "URL to update."
+    description: "Formula URL to update."
     default: ""
   sha256:
-    description: "SHA256 hash to update."
+    description: "Formula Hash to update."
     default: ""
   version:
-    description: "Version to update."
+    description: "Formula Version to update."
     default: ""
+  calculate:
+    description: "Calculate sha256 from url."
+    default: "true"
   repo:
     description: "Homebrew Tap: owner/name"
     required: true
@@ -50,9 +53,12 @@ outputs:
     value: ${{ steps.summary.outputs.message }}
   branch:
     description: "Branch Used"
-    value: ${{ steps.branch.outputs.default }}
+    value: ${{ steps.summary.outputs.branch }}
+  sha256:
+    description: "Formula Hash"
+    value: ${{ steps.summary.outputs.sha256 }}
   sha:
-    description: "Commit SHA"
+    description: "Commit Hash"
     value: ${{ steps.commit.outputs.sha }}
 
 runs:
@@ -64,6 +70,7 @@ runs:
         echo "inputs.url: ${{ inputs.url }}"
         echo "inputs.sha256: ${{ inputs.sha256 }}"
         echo "inputs.version: ${{ inputs.version }}"
+        echo "inputs.calculate: ${{ inputs.calculate }}"
 
         echo "inputs.repo: ${{ inputs.repo }}"
         echo "inputs.formula: ${{ inputs.formula }}"
@@ -71,6 +78,7 @@ runs:
         echo "inputs.branch: ${{ inputs.branch }}"
 
         echo "inputs.app_id: ${{ inputs.app_id }}"
+        echo "inputs.commit: ${{ inputs.commit }}"
 
     - name: "Get Default Branch"
       id: branch
@@ -83,18 +91,23 @@ runs:
         else
           branch="$(gh repo view ${{ inputs.repo }} --json defaultBranchRef --jq .defaultBranchRef.name)"
         fi
+
         echo "branch: ${branch}"
-        echo "default=${branch}" >> "$GITHUB_OUTPUT"
+        if [ -z "${branch}" ];then
+          echo "::error::Unable to determine default branch."
+          exit 1
+        fi
+        echo "branch=${branch}" >> "$GITHUB_ENV"
 
     - name: "Checkout Homebrew Tap"
       uses: actions/checkout@v6
       with:
         path: homebrew-tap
         persist-credentials: false
-        ref: ${{ steps.branch.outputs.default }}
+        ref: ${{ env.branch }}
         repository: ${{ inputs.repo }}
 
-    - name: "Get Formula File"
+    - name: "Set Formula File"
       env:
         path: homebrew-tap/Formula
       shell: bash
@@ -105,25 +118,48 @@ runs:
 
         if [ -n "${{ inputs.formula }}" ];then
           if [ -f "${{ env.path }}/${{ inputs.formula }}" ];then
-            echo "formula=${{ env.path }}/${{ inputs.formula }}" >> "$GITHUB_ENV"
+            formula="${{ env.path }}/${{ inputs.formula }}"
           elif [ -f "${{ env.path }}/${{ inputs.formula }}.rb" ];then
-            echo "formula=${{ env.path }}/${{ inputs.formula }}.rb" >> "$GITHUB_ENV"
+            formula="${{ env.path }}/${{ inputs.formula }}.rb"
           fi
         else
-          echo "formula=${{ env.path }}/${GITHUB_REPOSITORY#*/}.rb" >> "$GITHUB_ENV"
+          formula="${{ env.path }}/${GITHUB_REPOSITORY#*/}.rb"
         fi
+
+        echo "formula: ${formula}"
+        if [ ! -f "${formula}" ];then
+          echo "::error::Not a File: ${formula}"
+          exit 1
+        fi
+        echo "formula=${formula}" >> "$GITHUB_ENV"
+
+    - name: "Calculate Hash"
+      shell: bash
+      run: |
+        unset sha256
+        if [ -n "${{ inputs.sha256 }}" ];
+          sha256="$(echo "${{ inputs.sha256 }}" | cut -d ':' -f 2)"
+        elif [ "${{ inputs.calculate }}" == "true" ];
+          if [ -n "${{ inputs.url }}" ];
+            echo "Downloading url: ${{ inputs.url }}"
+            wget -O "${{ runner.temp }}/download" "${{ inputs.url }}"
+            stat "${{ runner.temp }}/download"
+            sha256sum "${{ runner.temp }}/download"
+            sha256="$(sha256sum "${{ runner.temp }}/download" | awk '{print $1}')"
+          else
+            echo "::warning::To calculate the sha256 you must provide the url."
+          fi
+        fi
+        echo "sha256: ${sha256}"
+        echo "sha256=${sha256}" >> "$GITHUB_ENV"
 
     - name: "Update Formula"
       shell: bash
       run: |
         echo "formula: ${{ env.formula }}"
-        if [ ! -f "${{ env.formula }}" ];then
-          echo "::error::Not a File: ${{ env.formula }}"
-          exit 1
-        fi
 
         bash "${{ github.action_path }}/src/update-formula.sh" url "${{ inputs.url }}"
-        bash "${{ github.action_path }}/src/update-formula.sh" sha256 "${{ inputs.sha256 }}"
+        bash "${{ github.action_path }}/src/update-formula.sh" sha256 "${{ env.sha256 }}"
         bash "${{ github.action_path }}/src/update-formula.sh" version "${{ inputs.version }}"
 
         echo "::group::cat ${{ env.formula }}"
@@ -135,32 +171,35 @@ runs:
       working-directory: homebrew-tap
       shell: bash
       run: |
+        echo "sha256=${{ env.sha256 }}" >> "$GITHUB_OUTPUT"
+        echo "branch=${{ env.branch }}" >> "$GITHUB_OUTPUT"
+
         file="$(basename ${{ env.formula }})"
+        echo "formula=${file}" >> "$GITHUB_OUTPUT"
+
         if [ -n "${{ inputs.message }}" ];then
-          message="${{ inputs.message }}" >> "$GITHUB_OUTPUT"
+          message="${{ inputs.message }}"
         elif [ -n "${{ inputs.version }}" ];then
-          message="Bump ${file} to ${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          message="Bump ${file} to ${{ inputs.version }}"
         else
-          message="Bump ${file}" >> "$GITHUB_OUTPUT"
+          message="Bump ${file}"
         fi
         echo "message: ${message}"
         echo "message=${message}" >> "$GITHUB_OUTPUT"
 
-        echo "formula=${file}" >> "$GITHUB_OUTPUT"
-
         diff="$(git diff -U0 Formula)"
-        echo "::group::diff"
+        echo "::group::git diff"
         echo "${diff}"
         echo "::endgroup::"
 
-        file_url="https://github.com/${{ inputs.repo }}/blob/${{ steps.branch.outputs.default }}/Formula/${file}"
+        file_url="https://github.com/${{ inputs.repo }}/blob/${{ env.branch }}/Formula/${file}"
         echo "file_url: ${file_url}"
 
         md="message: **${message}**\n"
         md+="formula: [Formula/${file}](${file_url})\n"
-        md+="url: \`${{ inputs.url || 'not updated' }}\`\n"
-        md+="sha256: \`${{ inputs.sha256 || 'not updated' }}\`\n"
-        md+="version: \`${{ inputs.version || 'not updated' }}\`\n"
+        md+="url: \`${{ inputs.url || 'not provided' }}\`\n"
+        md+="sha256: \`${{ env.sha256 || 'not provided' }}\`\n"
+        md+="version: \`${{ inputs.version || 'not provided' }}\`\n"
         md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
@@ -170,7 +209,7 @@ runs:
       uses: suzuki-shunsuke/commit-action@87b297f0ce551411b43d1880f4fb3cbc60381055 # v0.0.14
       with:
         root_dir: homebrew-tap
-        branch: ${{ steps.branch.outputs.default }}
+        branch: ${{ env.branch }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
         github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
