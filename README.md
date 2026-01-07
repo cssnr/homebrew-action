@@ -37,13 +37,15 @@
     sha256: a6c550e966e # calculated from url
     version: ${{ github.ref_name }} # optional
     calculate: true # true is default, optional
-    repo: cssnr/homebrew-tap
+    repo: cssnr/homebrew-tap # set to your tap
     formula: toml-run.rb # optional
     message: Bump toml-run # optional
     branch: master # optional
     token: ${{ secrets.HOMEBREW_PAT }} # or app_id
     commit: true # true is default, optional
 ```
+
+For more workflow examples, see the [Examples](#examples) section.
 
 For an example Tap, see my tap: <https://github.com/cssnr/homebrew-tap>
 
@@ -67,6 +69,8 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 | `commit`          |         `true`          | Commit and Push Changes        |
 
 You should provide at least one of `url`, `sha256` or `version` to update.
+
+The `sha256` is calculated from the `url` unless the `sha256` is provided or `calculate` is set to `false`.
 
 To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
@@ -99,7 +103,7 @@ permissions:
 
 ## Examples
 
-Minimal usage.
+Minimal with provided URL.
 
 ```yaml
 - name: 'Homebrew Action'
