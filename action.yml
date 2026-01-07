@@ -1,5 +1,5 @@
 name: "Homebrew Action"
-description: "Homebrew Action to Update Formula."
+description: "Homebrew Action to Update Custom Tap Formula url, sha256 and version with Verified Commits."
 author: "Shane"
 
 branding:

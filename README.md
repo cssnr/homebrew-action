@@ -36,11 +36,13 @@
     url: https://cssnr.com/#app.zip # optional
     sha256: a6c550e966e # calculated from url
     version: ${{ github.ref_name }} # optional
+    calculate: true # true is default, optional
     repo: cssnr/homebrew-tap
     formula: toml-run.rb # optional
     message: Bump toml-run # optional
     branch: master # optional
     token: ${{ secrets.HOMEBREW_PAT }} # or app_id
+    commit: true # true is default, optional
 ```
 
 ## Inputs
@@ -93,12 +95,47 @@ permissions:
 
 ## Examples
 
-Example workflow with all inputs...
+Minimal usage.
 
 ```yaml
-- name: 'PyPi URL'
-  id: url
-  uses: cssnr/web-request-action@master
+- name: 'Homebrew Action'
+  id: homebrew
+  uses: cssnr/homebrew-action@master
+  with:
+    url: https://... # used to calculate the sha256
+    repo: cssnr/homebrew-tap
+    token: ${{ secrets.REPO_TOKEN }}
+```
+
+Update from a GitHub Release.
+
+```yaml
+- name: 'Upload Release'
+  id: release
+  uses: cssnr/upload-release-action@v1
+  with:
+    files: dist/asset.zip
+
+- name: 'Homebrew Action'
+  uses: cssnr/homebrew-action@master
+  with:
+    url: ${{ fromJSON(steps.release.outputs.assets)[1].browser_download_url }}
+    sha256: ${{ fromJSON(steps.release.outputs.assets)[1].digest }}
+    version: ${{ github.ref_name }}
+    repo: cssnr/homebrew-tap
+    formula: get-contributors.rb # .rb is optional
+    message: Bump get-contributors.rb to ${{ github.ref_name }}
+    branch: master
+    app_id: 146360
+    app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+```
+
+Update from a PyPi Release.
+
+```yaml
+- name: 'PyPi Request'
+  id: request
+  uses: cssnr/web-request-action@v2
   with:
     method: 'GET'
     url: 'https://pypi.org/pypi/toml-run/${{ github.ref_name }}/json'
@@ -108,8 +145,8 @@ Example workflow with all inputs...
   id: homebrew
   uses: cssnr/homebrew-action@master
   with:
-    url: ${{ fromJSON(steps.url.outputs.result).url }}
-    sha256: ${{ fromJSON(steps.url.outputs.result).digests.sha256 }}
+    url: ${{ fromJSON(steps.request.outputs.result).url }}
+    sha256: ${{ fromJSON(steps.request.outputs.result).digests.sha256 }}
     version: ${{ github.ref_name }}
     repo: cssnr/homebrew-tap
     formula: toml-run.rb # .rb is optional
@@ -118,7 +155,7 @@ Example workflow with all inputs...
     app_id: 12345678
     app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-- name: 'Debug Outputs'
+- name: 'Echo Outputs'
   continue-on-error: true
   run: |
     echo "formula: ${{ steps.homebrew.outputs.formula }}"
