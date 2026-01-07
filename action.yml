@@ -137,10 +137,10 @@ runs:
       shell: bash
       run: |
         unset sha256
-        if [ -n "${{ inputs.sha256 }}" ];
+        if [ -n "${{ inputs.sha256 }}" ];then
           sha256="$(echo "${{ inputs.sha256 }}" | cut -d ':' -f 2)"
-        elif [ "${{ inputs.calculate }}" == "true" ];
-          if [ -n "${{ inputs.url }}" ];
+        elif [ "${{ inputs.calculate }}" == "true" ];then
+          if [ -n "${{ inputs.url }}" ];then
             echo "Downloading url: ${{ inputs.url }}"
             wget -O "${{ runner.temp }}/download" "${{ inputs.url }}"
             stat "${{ runner.temp }}/download"
