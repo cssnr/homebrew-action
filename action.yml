@@ -105,8 +105,8 @@ runs:
       with:
         app-id: ${{ inputs.app_id }}
         private-key: ${{ inputs.app_private_key }}
-        owner: ${{ steps.token.outputs.owner }}
-        repositories: ${{ steps.token.outputs.repo }}
+        owner: ${{ steps.inputs.outputs.owner }}
+        repositories: ${{ steps.inputs.outputs.repo }}
 
     - name: "Get User"
       id: user
@@ -114,7 +114,7 @@ runs:
         GH_TOKEN: ${{ steps.token.outputs.token }}
       shell: bash
       run: |
-        name="${{ steps.inputs.outputs.app-slug }}[bot]"
+        name="${{ steps.token.outputs.app-slug }}[bot]"
         echo "name: ${name}"
         echo "name=${name}" >> "$GITHUB_OUTPUT"
 
