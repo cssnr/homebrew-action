@@ -21,6 +21,7 @@ permissions:
 jobs:
   test1:
     name: "Test 1"
+    if: ${{ !contains(github.event.head_commit.message, '#notest') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
 

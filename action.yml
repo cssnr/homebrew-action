@@ -100,6 +100,7 @@ runs:
         echo "repo=${repo}" >> "$GITHUB_OUTPUT"
 
     - name: "Create App Token"
+      if: ${{ inputs.app_id }}
       uses: actions/create-github-app-token@v2
       id: token
       with:
@@ -108,6 +109,7 @@ runs:
         owner: ${{ steps.inputs.outputs.owner }}
         repositories: ${{ steps.inputs.outputs.repo }}
 
+    # TODO: Determine if App or Token, set output, and use in workflow...
     - name: "Get User"
       id: user
       env:
