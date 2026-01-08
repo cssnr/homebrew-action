@@ -43,6 +43,7 @@
     branch: master # optional
     token: ${{ secrets.HOMEBREW_PAT }} # or app_id
     commit: true # true is default, optional
+    pull: false # false is default, optional
 ```
 
 For more workflow examples, see the [Examples](#examples) section.
@@ -75,6 +76,8 @@ The `sha256` is calculated from the `url` unless the `sha256` is provided or `ca
 
 To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
+To create a `pull` request your token/app must have `pull-request: write`. _See [Permissions](#permissions)._
+
 To see how updates are applied, view the: [src/update-formula.sh](src/update-formula.sh)
 
 ### Permissions
@@ -90,6 +93,13 @@ Alternatively, you can create and use a GitHub App ID and Private Key.
 ```yaml
 permissions:
   contents: write
+```
+
+If you set `pull: true` you must grant `pull-request: write` permissions.
+
+```yaml
+permissions:
+  pull-request: write
 ```
 
 ## Outputs
@@ -159,11 +169,12 @@ Update from a PyPi Release.
     sha256: ${{ fromJSON(steps.request.outputs.result).digests.sha256 }}
     version: ${{ github.ref_name }} # only set if you use version
     repo: cssnr/homebrew-tap
-    formula: toml-run.rb # .rb is optional
+    formula: t/toml-run.rb # t/ and .rb are optional
     message: Bump toml-run to ${{ github.ref_name }}
     branch: master
     app_id: 12345678
     app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+    pull: true
 
 - name: 'Echo Outputs'
   continue-on-error: true
