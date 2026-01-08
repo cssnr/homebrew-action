@@ -102,6 +102,8 @@ permissions:
   pull-request: write
 ```
 
+Note: these are not workflow permissions, they are Token/App permissions.
+
 ## Outputs
 
 | Output  | Description       |
@@ -115,7 +117,7 @@ permissions:
 
 ## Examples
 
-Minimal with provided URL.
+Minimal with Provided URL.
 
 ```yaml
 - name: 'Homebrew Action'
@@ -185,6 +187,7 @@ Update from a PyPi Release.
     echo "sha256: ${{ steps.homebrew.outputs.sha256 }}"
     echo "sha: ${{ steps.homebrew.outputs.sha }}"
     echo "pull: ${{ steps.homebrew.outputs.pull }}"
+    echo "pull url: ${{ fromJSON(steps.pull.outputs.pull).html_url }}"
 ```
 
 For more examples, check out other projects using this action:  
