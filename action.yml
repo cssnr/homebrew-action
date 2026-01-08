@@ -73,7 +73,8 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: "Debug Inputs"
+    - name: "Inputs"
+      id: inputs
       shell: bash
       run: |
         echo "inputs.url: ${{ inputs.url }}"
@@ -91,20 +92,29 @@ runs:
         echo "inputs.commit: ${{ inputs.commit }}"
         echo "inputs.pull: ${{ inputs.pull }}"
 
+        owner="$(echo "${{ inputs.repo }}" | cut -d "/" -f 1)"
+        echo "owner: ${owner}"
+        echo "owner=${owner}" >> "$GITHUB_OUTPUT"
+        repo="$(echo "${{ inputs.repo }}" | cut -d "/" -f 2)"
+        echo "repo: ${repo}"
+        echo "repo=${repo}" >> "$GITHUB_OUTPUT"
+
     - name: "Create App Token"
       uses: actions/create-github-app-token@v2
       id: token
       with:
         app-id: ${{ inputs.app_id }}
         private-key: ${{ inputs.app_private_key }}
+        owner: ${{ steps.token.outputs.owner }}
+        repositories: ${{ steps.token.outputs.repo }}
 
-    - name: "Parse User"
+    - name: "Get User"
       id: user
       env:
         GH_TOKEN: ${{ steps.token.outputs.token }}
       shell: bash
       run: |
-        name="${{ steps.token.outputs.app-slug }}[bot]"
+        name="${{ steps.inputs.outputs.app-slug }}[bot]"
         echo "name: ${name}"
         echo "name=${name}" >> "$GITHUB_OUTPUT"
 
