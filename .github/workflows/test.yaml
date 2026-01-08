@@ -42,9 +42,9 @@ jobs:
           message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
           #branch: master
           #create_branch: true
-          #token: ${{ secrets.HOMEBREW_TEST }}
-          app_id: 146360
-          app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.HOMEBREW_TEST }}
+          #app_id: 146360
+          #app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
           #commit: false
           pull: true
 
