@@ -102,18 +102,26 @@ permissions:
   pull-request: write
 ```
 
-Note: these are not workflow permissions, they are Token/App permissions.
+_Note: these are not workflow permissions, they are Token/App permissions._
 
 ## Outputs
 
-| Output  | Description       |
-| :------ | :---------------- |
-| formula | Formula File      |
-| message | Commit Message    |
-| branch  | Branch Used       |
-| sha256  | Formula Hash      |
-| sha     | Commit Hash       |
-| pull    | Pull Request JSON |
+| Output    | Description       |
+| :-------- | :---------------- |
+| `formula` | Formula File      |
+| `message` | Commit Message    |
+| `branch`  | Branch Used       |
+| `sha256`  | Formula Hash      |
+| `sha`     | Commit Hash       |
+| `pull`    | Pull Request JSON |
+
+The commit `sha` and `pull` json are only set if `commit` and/or `pull` is enabled.
+
+Tip: you can parse the `pull` output with `fromJSON`.
+
+```yaml
+run: echo "${{ fromJSON(steps.pull.outputs.pull).html_url }}"
+```
 
 ## Examples
 
@@ -121,7 +129,6 @@ Minimal with Provided URL.
 
 ```yaml
 - name: 'Homebrew Action'
-  id: homebrew
   uses: cssnr/homebrew-action@master
   with:
     url: https://... # used to calculate the sha256
