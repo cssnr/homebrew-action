@@ -91,10 +91,40 @@ runs:
         echo "inputs.commit: ${{ inputs.commit }}"
         echo "inputs.pull: ${{ inputs.pull }}"
 
+    - name: "Create App Token"
+      uses: actions/create-github-app-token@v2
+      id: token
+      with:
+        app-id: ${{ inputs.app_id }}
+        private-key: ${{ inputs.app_private_key }}
+
+    - name: "Parse User"
+      id: user
+      env:
+        GH_TOKEN: ${{ steps.token.outputs.token }}
+      shell: bash
+      run: |
+        name="${{ steps.token.outputs.app-slug }}[bot]"
+        echo "name: ${name}"
+        echo "name=${name}" >> "$GITHUB_OUTPUT"
+
+        url="/users/${name}"
+        echo "url: ${url}"
+        user_id="$(gh api "${url}" --jq .id)"
+        echo "user_id: ${user_id}"
+
+        email="${user_id}+${name}@users.noreply.github.com"
+        echo "email: ${email}"
+        echo "email=${email}" >> "$GITHUB_OUTPUT"
+
+        string="${name} <${email}>"
+        echo "string: ${string}"
+        echo "string=${string}" >> "$GITHUB_OUTPUT"
+
     - name: "Get Default Branch"
       id: branch
       env:
-        GH_TOKEN: ${{ inputs.token }}
+        GH_TOKEN: ${{ steps.token.outputs.token }}
       shell: bash
       run: |
         if [ -n "${{ inputs.branch }}" ];then
@@ -129,6 +159,7 @@ runs:
         persist-credentials: false
         ref: ${{ env.branch }}
         repository: ${{ inputs.repo }}
+        token: ${{ steps.token.outputs.token }}
 
     - name: "Set Formula File"
       env:
@@ -235,16 +266,20 @@ runs:
         branch: ${{ env.head_branch }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
-        github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
-        app_id: ${{ inputs.app_id }}
-        app_private_key: ${{ inputs.app_private_key }}
+        #github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
+        #app_id: ${{ inputs.app_id }}
+        #app_private_key: ${{ inputs.app_private_key }}
+        github_token: ${{ steps.token.outputs.token }}
 
     - name: "Create Pull Request"
       if: ${{ inputs.pull == 'true' }}
       uses: peter-evans/create-pull-request@v8
       with:
-        token: ${{ inputs.token }}
+        token: ${{ steps.token.outputs.token }}
         path: homebrew-tap
+        title: ${{ steps.summary.outputs.message }}
         commit-message: ${{ steps.summary.outputs.message }}
         branch: ${{ env.head_branch }}
         base: ${{ env.branch }}
+        committer: ${{ steps.user.outputs.string }}
+        body: "Disable Advertising"
