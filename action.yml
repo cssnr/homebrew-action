@@ -102,21 +102,38 @@ runs:
     - name: "Create App Token"
       if: ${{ inputs.app_id }}
       uses: actions/create-github-app-token@v2
-      id: token
+      id: app
       with:
         app-id: ${{ inputs.app_id }}
         private-key: ${{ inputs.app_private_key }}
         owner: ${{ steps.inputs.outputs.owner }}
         repositories: ${{ steps.inputs.outputs.repo }}
 
-    # TODO: Determine if App or Token, set output, and use in workflow...
+    - name: "Set Token"
+      id: token
+      shell: bash
+      run: |
+        if [ -n "${{ steps.app.outputs.token }}" ];then
+          echo "Using Generated App Token"
+          echo "token=${{ steps.app.outputs.token }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "Using User Provided Token"
+          echo "token=${{ inputs.token }}" >> "$GITHUB_OUTPUT"
+        fi
+
+    # TODO: Set proper user details. Note: Only used in: Create Pull Request
     - name: "Get User"
       id: user
       env:
         GH_TOKEN: ${{ steps.token.outputs.token }}
       shell: bash
       run: |
-        name="${{ steps.token.outputs.app-slug }}[bot]"
+        if [ -z "${{ steps.app.outputs.app-slug }}" ];then
+          echo "string=" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        name="${{ steps.app.outputs.app-slug }}[bot]"
         echo "name: ${name}"
         echo "name=${name}" >> "$GITHUB_OUTPUT"
 
