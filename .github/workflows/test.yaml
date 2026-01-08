@@ -14,13 +14,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   test1:
     name: "Test 1"
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions:
-      contents: write
 
     steps:
       - name: "Checkout"
@@ -38,11 +40,12 @@ jobs:
           formula: toml-run.rb
           message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
           #branch: master
-          create_branch: true
+          #create_branch: true
           #token: ${{ secrets.HOMEBREW_TEST }}
           app_id: 146360
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
           #commit: false
+          pull: true
 
       - name: "Validate Outputs"
         uses: cssnr/validate-outputs-action@master
