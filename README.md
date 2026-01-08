@@ -43,6 +43,7 @@
     branch: master # optional
     token: ${{ secrets.HOMEBREW_PAT }} # or app_id
     commit: true # true is default, optional
+    pull: false # false is default, optional
 ```
 
 For more workflow examples, see the [Examples](#examples) section.
@@ -59,20 +60,23 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 | `sha256`          | _calculated from `url`_ | Formula Hash to update         |
 | `version`         |            -            | Formula Version to update      |
 | `calculate`       |         `true`          | Calculate `sha256` from `url`  |
-| `repo`            |      ⚠️ _Required_      | Repository `{owner}/{name}`    |
+| `repo`            |       _Required_        | Repository `{owner}/{name}`    |
 | `formula`         |    `{repo-name}.rb`     | File relative to `Formula`     |
 | `message`         |  Bump `{.rb}` to `{v}`  | Commit Message                 |
-| `branch`          |    _Default Branch_     | Branch to Checkout/Commit      |
+| `branch`          |    _Default Branch_     | Branch to Checkout             |
 | `token`           |     `GITHUB_TOKEN`      | Access Token for `repo`        |
 | `app_id`          |    _w/ private_key_     | App ID (and private key)       |
 | `app_private_key` |       _w/ app_id_       | App Private Key (and id)       |
 | `commit`          |         `true`          | Commit and Push Changes        |
+| `pull`            |         `false`         | Create a Pull Request          |
 
 You should provide at least one of `url`, `sha256` or `version` to update.
 
 The `sha256` is calculated from the `url` unless the `sha256` is provided or `calculate` is set to `false`.
 
 To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
+
+To create a `pull` request your token/app must have `pull-request: write`. _See [Permissions](#permissions)._
 
 To see how updates are applied, view the: [src/update-formula.sh](src/update-formula.sh)
 
@@ -91,23 +95,40 @@ permissions:
   contents: write
 ```
 
+If you set `pull: true` you must grant `pull-request: write` permissions.
+
+```yaml
+permissions:
+  pull-request: write
+```
+
+_Note: these are not workflow permissions, they are Token/App permissions._
+
 ## Outputs
 
-| Output  | Description    |
-| :------ | :------------- |
-| formula | Formula File   |
-| message | Commit Message |
-| branch  | Branch Used    |
-| sha256  | Formula Hash   |
-| sha     | Commit Hash    |
+| Output    | Description       |
+| :-------- | :---------------- |
+| `formula` | Formula File      |
+| `message` | Commit Message    |
+| `branch`  | Branch Used       |
+| `sha256`  | Formula Hash      |
+| `sha`     | Commit Hash       |
+| `pull`    | Pull Request JSON |
+
+The commit `sha` and `pull` json are only set if `commit` and/or `pull` is enabled.
+
+Tip: you can parse the `pull` output with `fromJSON`.
+
+```yaml
+run: echo "${{ fromJSON(steps.pull.outputs.pull).html_url }}"
+```
 
 ## Examples
 
-Minimal with provided URL.
+Minimal with Provided URL.
 
 ```yaml
 - name: 'Homebrew Action'
-  id: homebrew
   uses: cssnr/homebrew-action@master
   with:
     url: https://... # used to calculate the sha256
@@ -157,11 +178,12 @@ Update from a PyPi Release.
     sha256: ${{ fromJSON(steps.request.outputs.result).digests.sha256 }}
     version: ${{ github.ref_name }} # only set if you use version
     repo: cssnr/homebrew-tap
-    formula: toml-run.rb # .rb is optional
+    formula: t/toml-run.rb # t/ and .rb are optional
     message: Bump toml-run to ${{ github.ref_name }}
     branch: master
     app_id: 12345678
     app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+    pull: true
 
 - name: 'Echo Outputs'
   continue-on-error: true
@@ -171,6 +193,8 @@ Update from a PyPi Release.
     echo "branch: ${{ steps.homebrew.outputs.branch }}"
     echo "sha256: ${{ steps.homebrew.outputs.sha256 }}"
     echo "sha: ${{ steps.homebrew.outputs.sha }}"
+    echo "pull: ${{ steps.homebrew.outputs.pull }}"
+    echo "pull url: ${{ fromJSON(steps.pull.outputs.pull).html_url }}"
 ```
 
 For more examples, check out other projects using this action:  

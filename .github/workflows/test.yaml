@@ -14,9 +14,53 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  test:
-    name: "Test"
+  test1:
+    name: "Test 1"
+    if: ${{ !contains(github.event.head_commit.message, '#notest') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Test Local Action"
+        id: test
+        uses: ./
+        with:
+          url: "https://example.com/toml_run-0.0.${{ github.run_number }}.tar.gz"
+          sha256: "abc123${{ github.run_number }}"
+          #version: ${{ github.ref_name }}
+          repo: smashedr/homebrew-test
+          formula: toml-run.rb
+          message: 🍺 Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
+          #branch: master
+          #create_branch: true
+          #token: ${{ secrets.HOMEBREW_TEST }}
+          app_id: 146360
+          app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          #commit: false
+          pull: true
+
+      - name: "Validate Outputs"
+        uses: cssnr/validate-outputs-action@master
+        with:
+          outputs: ${{ toJSON(steps.test.outputs) }}
+          data: |
+            formula: toml-run.rb
+            message: 🍺 Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
+            branch:
+            sha256: "abc123${{ github.run_number }}"
+            sha:
+            pull:
+
+  test2:
+    name: "Test 2"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -26,46 +70,21 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v6
 
-      - name: "Debug event.json"
-        if: ${{ !github.event.act }}
-        continue-on-error: true
-        run: cat "${GITHUB_EVENT_PATH}"
-      - name: "Debug CTX github"
-        if: ${{ !github.event.act }}
-        continue-on-error: true
-        env:
-          GITHUB_CTX: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CTX"
-      - name: "Debug Environment"
-        if: ${{ !github.event.act }}
-        continue-on-error: true
-        run: env
-
       - name: "Test Local Action"
         id: test
         uses: ./
         with:
-          url: "https://example.com/toml_run-0.0.${{ github.run_number }}.tar.gz"
-          #url: "https://github.com/cssnr/vitepress-plugin-contributors/releases/download/0.0.5/get-contributors.js"
-          sha256: "abc123${{ github.run_number }}"
-          #version: ${{ github.ref_name }}
+          url: "https://github.com/cssnr/vitepress-plugin-contributors/releases/download/0.0.5/get-contributors.js"
           repo: smashedr/homebrew-test
-          formula: toml-run.rb
-          message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
-          #branch: master
-          #token: ${{ secrets.HOMEBREW_TEST }}
-          app_id: 146360
-          app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
-          #commit: false
+          formula: npmstat.rb
+          commit: false
 
       - name: "Validate Outputs"
         uses: cssnr/validate-outputs-action@master
         with:
           outputs: ${{ toJSON(steps.test.outputs) }}
           data: |
-            formula: toml-run.rb
-            message: Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
+            formula: npmstat.rb
+            message: Bump npmstat.rb
             branch: master
-            sha256: "abc123${{ github.run_number }}"
-            #sha256: 9309a179f2440f0ea576e31031e87f2c9eda26bc72f5eb5f9924463e75a06ec1
-            sha:
+            sha256: 9309a179f2440f0ea576e31031e87f2c9eda26bc72f5eb5f9924463e75a06ec1

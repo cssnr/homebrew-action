@@ -29,8 +29,14 @@ inputs:
     description: "Commit message."
     default: ""
   branch:
-    description: "Branch to Checkout and Commit."
+    description: "Branch to Checkout."
     default: ""
+  head_branch:
+    description: "Branch to Push Too."
+    default: ""
+  create_branch:
+    description: "Create Head Branch."
+    default: "false"
   token:
     description: "Fine Grained or PAT w/ contents: write"
     default: ${{ github.token }}
@@ -43,6 +49,9 @@ inputs:
   commit:
     description: "Commit and Push Changes"
     default: "true"
+  pull:
+    description: "Create Pull Request"
+    default: "false"
 
 outputs:
   formula:
@@ -60,11 +69,15 @@ outputs:
   sha:
     description: "Commit Hash"
     value: ${{ steps.commit.outputs.sha }}
+  pull:
+    description: "Pull Request JSON"
+    value: ${{ steps.pull.outputs.pull }}
 
 runs:
   using: "composite"
   steps:
-    - name: "Debug Inputs"
+    - name: "Inputs"
+      id: inputs
       shell: bash
       run: |
         echo "inputs.url: ${{ inputs.url }}"
@@ -76,14 +89,45 @@ runs:
         echo "inputs.formula: ${{ inputs.formula }}"
         echo "inputs.message: ${{ inputs.message }}"
         echo "inputs.branch: ${{ inputs.branch }}"
+        echo "inputs.head_branch: ${{ inputs.head_branch }}"
 
         echo "inputs.app_id: ${{ inputs.app_id }}"
         echo "inputs.commit: ${{ inputs.commit }}"
+        echo "inputs.pull: ${{ inputs.pull }}"
+
+        owner="$(echo "${{ inputs.repo }}" | cut -d "/" -f 1)"
+        echo "1️⃣ owner: ${owner}"
+        echo "owner=${owner}" >> "$GITHUB_OUTPUT"
+        repo="$(echo "${{ inputs.repo }}" | cut -d "/" -f 2)"
+        echo "2️⃣ repo: ${repo}"
+        echo "repo=${repo}" >> "$GITHUB_OUTPUT"
+
+    - name: "Create App Token"
+      if: ${{ inputs.app_id }}
+      uses: actions/create-github-app-token@v2
+      id: app
+      with:
+        app-id: ${{ inputs.app_id }}
+        private-key: ${{ inputs.app_private_key }}
+        owner: ${{ steps.inputs.outputs.owner }}
+        repositories: ${{ steps.inputs.outputs.repo }}
+
+    - name: "Set Token"
+      id: token
+      shell: bash
+      run: |
+        if [ -n "${{ steps.app.outputs.token }}" ];then
+          echo "🤖 Using Generated App Token"
+          echo "token=${{ steps.app.outputs.token }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "🧑 Using User Provided Token"
+          echo "token=${{ inputs.token }}" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: "Get Default Branch"
       id: branch
       env:
-        GH_TOKEN: ${{ inputs.token }}
+        GH_TOKEN: ${{ steps.token.outputs.token }}
       shell: bash
       run: |
         if [ -n "${{ inputs.branch }}" ];then
@@ -91,13 +135,24 @@ runs:
         else
           branch="$(gh repo view ${{ inputs.repo }} --json defaultBranchRef --jq .defaultBranchRef.name)"
         fi
-
-        echo "branch: ${branch}"
+        echo "▶️ branch: ${branch}"
         if [ -z "${branch}" ];then
           echo "::error::Unable to determine default branch."
           exit 1
         fi
         echo "branch=${branch}" >> "$GITHUB_ENV"
+
+        if [ -n "${{ inputs.head_branch }}" ];then
+          head_branch="${{ inputs.head_branch }}"
+        elif [ "${{ inputs.pull }}" != "false" ];then
+          head_branch="bump-formula-${{ github.run_number }}"
+        elif [ "${{ inputs.create_branch }}" != "false" ];then
+          head_branch="bump-formula-${{ github.run_number }}"
+        else
+          head_branch="${branch}"
+        fi
+        echo "🔄 head_branch: ${head_branch}"
+        echo "head_branch=${head_branch}" >> "$GITHUB_ENV"
 
     - name: "Checkout Homebrew Tap"
       uses: actions/checkout@v6
@@ -106,31 +161,40 @@ runs:
         persist-credentials: false
         ref: ${{ env.branch }}
         repository: ${{ inputs.repo }}
+        token: ${{ steps.token.outputs.token }}
 
     - name: "Set Formula File"
       env:
         path: homebrew-tap/Formula
       shell: bash
       run: |
+        echo "Formula Path: ${{ env.path }}"
         echo "::group::ls ${{ env.path }}"
         ls -lah "${{ env.path }}"
         echo "::endgroup::"
 
         if [ -n "${{ inputs.formula }}" ];then
-          if [ -f "${{ env.path }}/${{ inputs.formula }}" ];then
-            formula="${{ env.path }}/${{ inputs.formula }}"
-          elif [ -f "${{ env.path }}/${{ inputs.formula }}.rb" ];then
-            formula="${{ env.path }}/${{ inputs.formula }}.rb"
-          fi
+          name="${{ inputs.formula }}"
         else
-          formula="${{ env.path }}/${GITHUB_REPOSITORY#*/}.rb"
+          name="${GITHUB_REPOSITORY#*/}"
         fi
+        echo "name: ${name}"
+        letter="$(echo "${name}" | head -c1)"
+        echo "letter: ${letter}"
 
-        echo "formula: ${formula}"
-        if [ ! -f "${formula}" ];then
-          echo "::error::Not a File: ${formula}"
+        if [ -f "${{ env.path }}/${name}" ];then
+          formula="${{ env.path }}/${name}"
+        elif [ -f "${{ env.path }}/${name}.rb" ];then
+          formula="${{ env.path }}/${name}.rb"
+        elif [ -f "${{ env.path }}/${letter}/${name}" ];then
+          formula="${{ env.path }}/${letter}/${name}"
+        elif [ -f "${{ env.path }}/${letter}/${name}.rb" ];then
+          formula="${{ env.path }}/${letter}/${name}.rb"
+        else
+          echo "::error::Formula Not Found: ${name}"
           exit 1
         fi
+        echo "📒 formula: ${formula}"
         echo "formula=${formula}" >> "$GITHUB_ENV"
 
     - name: "Calculate Hash"
@@ -141,7 +205,7 @@ runs:
           sha256="$(echo "${{ inputs.sha256 }}" | cut -d ':' -f 2)"
         elif [ "${{ inputs.calculate }}" == "true" ];then
           if [ -n "${{ inputs.url }}" ];then
-            echo "Downloading url: ${{ inputs.url }}"
+            echo "🌐 Downloading url: ${{ inputs.url }}"
             wget -O "${{ runner.temp }}/download" "${{ inputs.url }}"
             stat "${{ runner.temp }}/download"
             sha256sum "${{ runner.temp }}/download"
@@ -150,7 +214,7 @@ runs:
             echo "::warning::To calculate the sha256 you must provide the url."
           fi
         fi
-        echo "sha256: ${sha256}"
+        echo "#️⃣ sha256: ${sha256}"
         echo "sha256=${sha256}" >> "$GITHUB_ENV"
 
     - name: "Update Formula"
@@ -172,7 +236,7 @@ runs:
       shell: bash
       run: |
         echo "sha256=${{ env.sha256 }}" >> "$GITHUB_OUTPUT"
-        echo "branch=${{ env.branch }}" >> "$GITHUB_OUTPUT"
+        echo "branch=${{ env.head_branch }}" >> "$GITHUB_OUTPUT"
 
         file="$(basename ${{ env.formula }})"
         echo "formula=${file}" >> "$GITHUB_OUTPUT"
@@ -192,15 +256,17 @@ runs:
         echo "${diff}"
         echo "::endgroup::"
 
-        file_url="https://github.com/${{ inputs.repo }}/blob/${{ env.branch }}/Formula/${file}"
+        file_url="https://github.com/${{ inputs.repo }}/blob/${{ env.head_branch }}/Formula/${file}"
         echo "file_url: ${file_url}"
+
+        # TODO: Generate body for pull request...
 
         md="message: **${message}**\n"
         md+="formula: [Formula/${file}](${file_url})\n"
         md+="url: \`${{ inputs.url || 'not provided' }}\`\n"
         md+="sha256: \`${{ env.sha256 || 'not provided' }}\`\n"
         md+="version: \`${{ inputs.version || 'not provided' }}\`\n"
-        md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
+        md+="git diff:\n\`\`\`diff\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
     - name: "Commit Action"
@@ -209,9 +275,37 @@ runs:
       uses: suzuki-shunsuke/commit-action@87b297f0ce551411b43d1880f4fb3cbc60381055 # v0.0.14
       with:
         root_dir: homebrew-tap
-        branch: ${{ env.branch }}
+        branch: ${{ env.head_branch }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
-        github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
-        app_id: ${{ inputs.app_id }}
-        app_private_key: ${{ inputs.app_private_key }}
+        github_token: ${{ steps.token.outputs.token }}
+        #github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
+        #app_id: ${{ inputs.app_id }}
+        #app_private_key: ${{ inputs.app_private_key }}
+
+    - name: "Create Pull Request"
+      id: pull
+      if: ${{ inputs.commit == 'true' && inputs.pull != 'false' }}
+      env:
+        GH_TOKEN: ${{ steps.token.outputs.token }}
+      shell: bash
+      run: |
+        pull="$(gh api --method POST \
+          -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+          "/repos/${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}/pulls" \
+            -f 'title=${{ steps.summary.outputs.message }}' \
+            -f 'body=${{ steps.summary.outputs.message }}' \
+            -f 'head=${{ env.head_branch }}' \
+            -f 'base=${{ env.branch }}' \
+        )"
+        echo "::group::pull"
+        echo "${pull}"
+        echo "::endgroup::"
+        echo "pull=${pull}" >> "$GITHUB_OUTPUT"
+
+    - name: "Debug Pull Request"
+      if: ${{ inputs.commit == 'true' && inputs.pull != 'false' }}
+      shell: bash
+      run: |
+        echo "html_url: ${{ fromJSON(steps.pull.outputs.pull).html_url }}"
+        echo "changed_files: ${{ fromJSON(steps.pull.outputs.pull).changed_files }}"
