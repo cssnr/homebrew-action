@@ -1,0 +1,41 @@
+# TODO: Only used in: Create Pull Request
+- name: "Get User"
+  id: user
+  env:
+    GH_TOKEN: ${{ steps.token.outputs.token }}
+  shell: bash
+  run: |
+    if [ -z "${{ steps.app.outputs.app-slug }}" ];then
+      echo "string=" >> "$GITHUB_OUTPUT"
+      exit 0
+    fi
+
+    name="${{ steps.app.outputs.app-slug }}[bot]"
+    echo "name: ${name}"
+    echo "name=${name}" >> "$GITHUB_OUTPUT"
+
+    url="/users/${name}"
+    echo "url: ${url}"
+    user_id="$(gh api "${url}" --jq .id)"
+    echo "user_id: ${user_id}"
+
+    email="${user_id}+${name}@users.noreply.github.com"
+    echo "email: ${email}"
+    echo "email=${email}" >> "$GITHUB_OUTPUT"
+
+    string="${name} <${email}>"
+    echo "string: ${string}"
+    echo "string=${string}" >> "$GITHUB_OUTPUT"
+
+- name: "Create Pull Request"
+  if: ${{ inputs.pull == 'true' }}
+  uses: peter-evans/create-pull-request@v8
+  with:
+    token: ${{ steps.token.outputs.token }}
+    path: homebrew-tap
+    title: ${{ steps.summary.outputs.message }}
+    commit-message: ${{ steps.summary.outputs.message }}
+    branch: ${{ env.head_branch }}
+    base: ${{ env.branch }}
+    committer: ${{ steps.user.outputs.string }}
+    body: "Disable Advertising"

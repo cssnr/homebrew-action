@@ -121,35 +121,6 @@ runs:
           echo "token=${{ inputs.token }}" >> "$GITHUB_OUTPUT"
         fi
 
-    # TODO: Set proper user details. Note: Only used in: Create Pull Request
-    - name: "Get User"
-      id: user
-      env:
-        GH_TOKEN: ${{ steps.token.outputs.token }}
-      shell: bash
-      run: |
-        if [ -z "${{ steps.app.outputs.app-slug }}" ];then
-          echo "string=" >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-
-        name="${{ steps.app.outputs.app-slug }}[bot]"
-        echo "name: ${name}"
-        echo "name=${name}" >> "$GITHUB_OUTPUT"
-
-        url="/users/${name}"
-        echo "url: ${url}"
-        user_id="$(gh api "${url}" --jq .id)"
-        echo "user_id: ${user_id}"
-
-        email="${user_id}+${name}@users.noreply.github.com"
-        echo "email: ${email}"
-        echo "email=${email}" >> "$GITHUB_OUTPUT"
-
-        string="${name} <${email}>"
-        echo "string: ${string}"
-        echo "string=${string}" >> "$GITHUB_OUTPUT"
-
     - name: "Get Default Branch"
       id: branch
       env:
@@ -285,12 +256,14 @@ runs:
         file_url="https://github.com/${{ inputs.repo }}/blob/${{ env.head_branch }}/Formula/${file}"
         echo "file_url: ${file_url}"
 
+        # TODO: Generate body for pull request...
+
         md="message: **${message}**\n"
         md+="formula: [Formula/${file}](${file_url})\n"
         md+="url: \`${{ inputs.url || 'not provided' }}\`\n"
         md+="sha256: \`${{ env.sha256 || 'not provided' }}\`\n"
         md+="version: \`${{ inputs.version || 'not provided' }}\`\n"
-        md+="git diff:\n\`\`\`text\n${diff}\n\`\`\`\n"
+        md+="git diff:\n\`\`\`diff\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
     - name: "Commit Action"
@@ -302,20 +275,20 @@ runs:
         branch: ${{ env.head_branch }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
+        github_token: ${{ steps.token.outputs.token }}
         #github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
         #app_id: ${{ inputs.app_id }}
         #app_private_key: ${{ inputs.app_private_key }}
-        github_token: ${{ steps.token.outputs.token }}
 
     - name: "Create Pull Request"
-      if: ${{ inputs.pull == 'true' }}
-      uses: peter-evans/create-pull-request@v8
-      with:
-        token: ${{ steps.token.outputs.token }}
-        path: homebrew-tap
-        title: ${{ steps.summary.outputs.message }}
-        commit-message: ${{ steps.summary.outputs.message }}
-        branch: ${{ env.head_branch }}
-        base: ${{ env.branch }}
-        committer: ${{ steps.user.outputs.string }}
-        body: "Disable Advertising"
+      env:
+        GH_TOKEN: ${{ steps.token.outputs.token }}
+      shell: bash
+      run: |
+        gh api --method POST \
+        -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+        "/repos/${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}/pulls" \
+          -f 'title=${{ steps.summary.outputs.message }}' \
+          -f 'body=${{ steps.summary.outputs.message }}' \
+          -f 'head=${{ env.head_branch }}' \
+          -f 'base=${{ env.branch }}'
