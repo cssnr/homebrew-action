@@ -59,10 +59,10 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 | `sha256`          | _calculated from `url`_ | Formula Hash to update         |
 | `version`         |            -            | Formula Version to update      |
 | `calculate`       |         `true`          | Calculate `sha256` from `url`  |
-| `repo`            |      ⚠️ _Required_      | Repository `{owner}/{name}`    |
+| `repo`            |       _Required_        | Repository `{owner}/{name}`    |
 | `formula`         |    `{repo-name}.rb`     | File relative to `Formula`     |
 | `message`         |  Bump `{.rb}` to `{v}`  | Commit Message                 |
-| `branch`          |    _Default Branch_     | Branch to Checkout/Commit      |
+| `branch`          |    _Default Branch_     | Branch to Checkout             |
 | `token`           |     `GITHUB_TOKEN`      | Access Token for `repo`        |
 | `app_id`          |    _w/ private_key_     | App ID (and private key)       |
 | `app_private_key` |       _w/ app_id_       | App Private Key (and id)       |

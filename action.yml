@@ -29,8 +29,14 @@ inputs:
     description: "Commit message."
     default: ""
   branch:
-    description: "Branch to Checkout and Commit."
+    description: "Branch to Checkout."
     default: ""
+  head_branch:
+    description: "Branch to Push Too."
+    default: ""
+  create_branch:
+    description: "Create Head Branch."
+    default: "false"
   token:
     description: "Fine Grained or PAT w/ contents: write"
     default: ${{ github.token }}
@@ -43,6 +49,9 @@ inputs:
   commit:
     description: "Commit and Push Changes"
     default: "true"
+  pull:
+    description: "Create Pull Request"
+    default: "false"
 
 outputs:
   formula:
@@ -76,9 +85,11 @@ runs:
         echo "inputs.formula: ${{ inputs.formula }}"
         echo "inputs.message: ${{ inputs.message }}"
         echo "inputs.branch: ${{ inputs.branch }}"
+        echo "inputs.head_branch: ${{ inputs.head_branch }}"
 
         echo "inputs.app_id: ${{ inputs.app_id }}"
         echo "inputs.commit: ${{ inputs.commit }}"
+        echo "inputs.pull: ${{ inputs.pull }}"
 
     - name: "Get Default Branch"
       id: branch
@@ -98,6 +109,18 @@ runs:
           exit 1
         fi
         echo "branch=${branch}" >> "$GITHUB_ENV"
+
+        if [ -n "${{ inputs.head_branch }}" ];then
+          head_branch="${{ inputs.head_branch }}"
+        elif [ "${{ inputs.pull }}" != "false" ];then
+          head_branch="bump-formula-${{ github.run_number }}"
+        elif [ "${{ inputs.create_branch }}" != "false" ];then
+          head_branch="bump-formula-${{ github.run_number }}"
+        else
+          head_branch="${branch}"
+        fi
+        echo "head_branch: ${head_branch}"
+        echo "head_branch=${head_branch}" >> "$GITHUB_ENV"
 
     - name: "Checkout Homebrew Tap"
       uses: actions/checkout@v6
@@ -172,7 +195,7 @@ runs:
       shell: bash
       run: |
         echo "sha256=${{ env.sha256 }}" >> "$GITHUB_OUTPUT"
-        echo "branch=${{ env.branch }}" >> "$GITHUB_OUTPUT"
+        echo "branch=${{ env.head_branch }}" >> "$GITHUB_OUTPUT"
 
         file="$(basename ${{ env.formula }})"
         echo "formula=${file}" >> "$GITHUB_OUTPUT"
@@ -192,7 +215,7 @@ runs:
         echo "${diff}"
         echo "::endgroup::"
 
-        file_url="https://github.com/${{ inputs.repo }}/blob/${{ env.branch }}/Formula/${file}"
+        file_url="https://github.com/${{ inputs.repo }}/blob/${{ env.head_branch }}/Formula/${file}"
         echo "file_url: ${file_url}"
 
         md="message: **${message}**\n"
@@ -209,7 +232,7 @@ runs:
       uses: suzuki-shunsuke/commit-action@87b297f0ce551411b43d1880f4fb3cbc60381055 # v0.0.14
       with:
         root_dir: homebrew-tap
-        branch: ${{ env.branch }}
+        branch: ${{ env.head_branch }}
         repository: ${{ inputs.repo }}
         commit_message: ${{ steps.summary.outputs.message }}
         github_token: ${{ inputs.app_id == '' && inputs.token || '' }}
