@@ -57,6 +57,7 @@ jobs:
             branch:
             sha256: "abc123${{ github.run_number }}"
             sha:
+            pull:
 
   test2:
     name: "Test 2"

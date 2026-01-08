@@ -69,6 +69,9 @@ outputs:
   sha:
     description: "Commit Hash"
     value: ${{ steps.commit.outputs.sha }}
+  pull:
+    description: "Pull Request JSON"
+    value: ${{ steps.pull.outputs.pull }}
 
 runs:
   using: "composite"
@@ -165,6 +168,7 @@ runs:
         path: homebrew-tap/Formula
       shell: bash
       run: |
+        echo "Formula Path: ${{ env.path }}"
         echo "::group::ls ${{ env.path }}"
         ls -lah "${{ env.path }}"
         echo "::endgroup::"
@@ -280,15 +284,28 @@ runs:
         #app_private_key: ${{ inputs.app_private_key }}
 
     - name: "Create Pull Request"
-      if: ${{ inputs.pull != 'false' }}
+      id: pull
+      if: ${{ inputs.commit == 'true' && inputs.pull != 'false' }}
       env:
         GH_TOKEN: ${{ steps.token.outputs.token }}
       shell: bash
       run: |
-        gh api --method POST \
-        -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
-        "/repos/${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}/pulls" \
-          -f 'title=${{ steps.summary.outputs.message }}' \
-          -f 'body=${{ steps.summary.outputs.message }}' \
-          -f 'head=${{ env.head_branch }}' \
-          -f 'base=${{ env.branch }}'
+        pull="$(gh api --method POST \
+          -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+          "/repos/${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}/pulls" \
+            -f 'title=${{ steps.summary.outputs.message }}' \
+            -f 'body=${{ steps.summary.outputs.message }}' \
+            -f 'head=${{ env.head_branch }}' \
+            -f 'base=${{ env.branch }}' \
+        )"
+        echo "::group::pull"
+        echo "${pull}"
+        echo "::endgroup::"
+        echo "pull=${pull}" >> "$GITHUB_OUTPUT"
+
+    - name: "Debug Pull Request"
+      if: ${{ inputs.commit == 'true' && inputs.pull != 'false' }}
+      shell: bash
+      run: |
+        echo "html_url: ${{ fromJSON(steps.pull.outputs.pull).html_url }}"
+        echo "changed_files: ${{ fromJSON(steps.pull.outputs.pull).changed_files }}"

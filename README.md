@@ -67,6 +67,7 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 | `app_id`          |    _w/ private_key_     | App ID (and private key)       |
 | `app_private_key` |       _w/ app_id_       | App Private Key (and id)       |
 | `commit`          |         `true`          | Commit and Push Changes        |
+| `pull`            |         `false`         | Create a Pull Request          |
 
 You should provide at least one of `url`, `sha256` or `version` to update.
 
@@ -93,13 +94,14 @@ permissions:
 
 ## Outputs
 
-| Output  | Description    |
-| :------ | :------------- |
-| formula | Formula File   |
-| message | Commit Message |
-| branch  | Branch Used    |
-| sha256  | Formula Hash   |
-| sha     | Commit Hash    |
+| Output  | Description       |
+| :------ | :---------------- |
+| formula | Formula File      |
+| message | Commit Message    |
+| branch  | Branch Used       |
+| sha256  | Formula Hash      |
+| sha     | Commit Hash       |
+| pull    | Pull Request JSON |
 
 ## Examples
 
@@ -171,6 +173,7 @@ Update from a PyPi Release.
     echo "branch: ${{ steps.homebrew.outputs.branch }}"
     echo "sha256: ${{ steps.homebrew.outputs.sha256 }}"
     echo "sha: ${{ steps.homebrew.outputs.sha }}"
+    echo "pull: ${{ steps.homebrew.outputs.pull }}"
 ```
 
 For more examples, check out other projects using this action:  
