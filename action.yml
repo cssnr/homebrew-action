@@ -183,20 +183,27 @@ runs:
         echo "::endgroup::"
 
         if [ -n "${{ inputs.formula }}" ];then
-          if [ -f "${{ env.path }}/${{ inputs.formula }}" ];then
-            formula="${{ env.path }}/${{ inputs.formula }}"
-          elif [ -f "${{ env.path }}/${{ inputs.formula }}.rb" ];then
-            formula="${{ env.path }}/${{ inputs.formula }}.rb"
-          fi
+          name="${{ inputs.formula }}"
         else
-          formula="${{ env.path }}/${GITHUB_REPOSITORY#*/}.rb"
+          name="${GITHUB_REPOSITORY#*/}"
         fi
+        echo "name: ${name}"
+        letter="$(echo "${name}" | head -c1)
+        echo "letter: ${letter}"
 
-        echo "formula: ${formula}"
-        if [ ! -f "${formula}" ];then
-          echo "::error::Not a File: ${formula}"
+        if [ -f "${{ env.path }}/${name}" ];then
+          formula="${{ env.path }}/${name}"
+        elif [ -f "${{ env.path }}/${name}.rb" ];then
+          formula="${{ env.path }}/${name}.rb"
+        elif [ -f "${{ env.path }}/${letter}/${name}" ];then
+          formula="${{ env.path }}/${letter}/${name}"
+        elif [ -f "${{ env.path }}/${letter}/${name}.rb" ];then
+          formula="${{ env.path }}/${letter}/${name}.rb"
+        else
+          echo "::error::Formula Not Found: ${name}"
           exit 1
         fi
+        echo "formula: ${formula}"
         echo "formula=${formula}" >> "$GITHUB_ENV"
 
     - name: "Calculate Hash"
