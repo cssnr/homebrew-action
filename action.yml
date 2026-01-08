@@ -93,10 +93,10 @@ runs:
         echo "inputs.pull: ${{ inputs.pull }}"
 
         owner="$(echo "${{ inputs.repo }}" | cut -d "/" -f 1)"
-        echo "owner: ${owner}"
+        echo "1️⃣ owner: ${owner}"
         echo "owner=${owner}" >> "$GITHUB_OUTPUT"
         repo="$(echo "${{ inputs.repo }}" | cut -d "/" -f 2)"
-        echo "repo: ${repo}"
+        echo "2️⃣ repo: ${repo}"
         echo "repo=${repo}" >> "$GITHUB_OUTPUT"
 
     - name: "Create App Token"
@@ -114,10 +114,10 @@ runs:
       shell: bash
       run: |
         if [ -n "${{ steps.app.outputs.token }}" ];then
-          echo "Using Generated App Token"
+          echo "🤖 Using Generated App Token"
           echo "token=${{ steps.app.outputs.token }}" >> "$GITHUB_OUTPUT"
         else
-          echo "Using User Provided Token"
+          echo "🧑 Using User Provided Token"
           echo "token=${{ inputs.token }}" >> "$GITHUB_OUTPUT"
         fi
 
@@ -132,8 +132,7 @@ runs:
         else
           branch="$(gh repo view ${{ inputs.repo }} --json defaultBranchRef --jq .defaultBranchRef.name)"
         fi
-
-        echo "branch: ${branch}"
+        echo "▶️ branch: ${branch}"
         if [ -z "${branch}" ];then
           echo "::error::Unable to determine default branch."
           exit 1
@@ -149,7 +148,7 @@ runs:
         else
           head_branch="${branch}"
         fi
-        echo "head_branch: ${head_branch}"
+        echo "🔄 head_branch: ${head_branch}"
         echo "head_branch=${head_branch}" >> "$GITHUB_ENV"
 
     - name: "Checkout Homebrew Tap"
@@ -191,7 +190,7 @@ runs:
           echo "::error::Formula Not Found: ${name}"
           exit 1
         fi
-        echo "formula: ${formula}"
+        echo "📒 formula: ${formula}"
         echo "formula=${formula}" >> "$GITHUB_ENV"
 
     - name: "Calculate Hash"
@@ -202,7 +201,7 @@ runs:
           sha256="$(echo "${{ inputs.sha256 }}" | cut -d ':' -f 2)"
         elif [ "${{ inputs.calculate }}" == "true" ];then
           if [ -n "${{ inputs.url }}" ];then
-            echo "Downloading url: ${{ inputs.url }}"
+            echo "🌐 Downloading url: ${{ inputs.url }}"
             wget -O "${{ runner.temp }}/download" "${{ inputs.url }}"
             stat "${{ runner.temp }}/download"
             sha256sum "${{ runner.temp }}/download"
@@ -211,7 +210,7 @@ runs:
             echo "::warning::To calculate the sha256 you must provide the url."
           fi
         fi
-        echo "sha256: ${sha256}"
+        echo "#️⃣ sha256: ${sha256}"
         echo "sha256=${sha256}" >> "$GITHUB_ENV"
 
     - name: "Update Formula"
@@ -281,6 +280,7 @@ runs:
         #app_private_key: ${{ inputs.app_private_key }}
 
     - name: "Create Pull Request"
+      if: ${{ inputs.pull != 'false' }}
       env:
         GH_TOKEN: ${{ steps.token.outputs.token }}
       shell: bash
