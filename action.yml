@@ -188,7 +188,7 @@ runs:
           name="${GITHUB_REPOSITORY#*/}"
         fi
         echo "name: ${name}"
-        letter="$(echo "${name}" | head -c1)
+        letter="$(echo "${name}" | head -c1)"
         echo "letter: ${letter}"
 
         if [ -f "${{ env.path }}/${name}" ];then
