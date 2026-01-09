@@ -76,7 +76,7 @@ The `sha256` is calculated from the `url` unless the `sha256` is provided or `ca
 
 To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
-To create a `pull` request your token/app must have `pull-request: write`. _See [Permissions](#permissions)._
+To create a `pull` request your token/app must have `pull-requests: write`. _See [Permissions](#permissions)._
 
 To see how updates are applied, view the: [src/update-formula.sh](src/update-formula.sh)
 
@@ -95,11 +95,11 @@ permissions:
   contents: write
 ```
 
-If you set `pull: true` you must grant `pull-request: write` permissions.
+If you set `pull: true` you must grant `pull-requests: write` permissions.
 
 ```yaml
 permissions:
-  pull-request: write
+  pull-requests: write
 ```
 
 _Note: these are not workflow permissions, they are Token/App permissions._
