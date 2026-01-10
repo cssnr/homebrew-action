@@ -296,7 +296,7 @@ runs:
     - name: "Create Pull"
       id: pull
       if: ${{ inputs.commit == 'true' && inputs.pull != 'false' }}
-      uses: cssnr/create-pull-action@master
+      uses: cssnr/create-pull-action@v1
       with:
         repository: ${{ inputs.repo }}
         head: ${{ env.head_branch }}
