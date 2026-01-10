@@ -168,6 +168,7 @@ runs:
       with:
         path: homebrew-tap
         persist-credentials: false
+        show-progress: false
         ref: ${{ env.branch }}
         repository: ${{ inputs.repo }}
         token: ${{ steps.token.outputs.token }}
