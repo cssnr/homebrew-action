@@ -11,7 +11,7 @@ if [ -z "${value}" ];then
     exit 0
 fi
 
-echo "::group::Processing: ${key}"
+echo -e "::group::\033[1;33m Processing: \033[1;36m${key}\033[0m"
 echo "value: ${value}"
 
 # shellcheck disable=SC2154

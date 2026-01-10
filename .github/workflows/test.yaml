@@ -18,6 +18,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  repository: smashedr/homebrew-test
+
 jobs:
   test1:
     name: "Test 1"
@@ -29,6 +32,23 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v6
 
+      - name: "Cleanup PR"
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TEST }}
+        run: |
+          number="$(gh pr list \
+            --repo "${{ env.repository }}" --json number \
+            --template '{{if gt (len .) 0}}{{(index . 0).number}}{{end}}' \
+          )"
+          if [ -n "${number}" ];then
+            echo "Closing Pull Request: ${number}"
+            gh pr close --repo "${{ env.repository }}" "${number}"
+            echo "Waiting 3 Seconds..."
+            sleep 3
+          else
+            echo "No PR's found: ${{ github.server_url }}/${{ env.repository }}/pulls"
+          fi
+
       - name: "Test Local Action"
         id: test
         uses: ./
@@ -36,7 +56,7 @@ jobs:
           url: "https://example.com/toml_run-0.0.${{ github.run_number }}.tar.gz"
           sha256: "abc123${{ github.run_number }}"
           #version: ${{ github.ref_name }}
-          repo: smashedr/homebrew-test
+          repo: ${{ env.repository }}
           formula: toml-run.rb
           message: 🍺 Bump toml-run.rb to 0.${{ github.run_attempt }}.${{ github.run_number }}
           #branch: master
@@ -46,6 +66,15 @@ jobs:
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
           #commit: false
           pull: true
+
+      #- name: "Add PR Comment"
+      #  if: ${{ github.event_name == 'pull_request' }}
+      #  continue-on-error: true
+      #  env:
+      #    GH_TOKEN: ${{ secrets.HOMEBREW_TEST }}
+      #  run: |
+      #    gh pr comment ${{ fromJSON(steps.test.outputs.pull).number }} -b \
+      #    "PR: ${{ fromJSON(steps.test.outputs.pull).html_url }}"
 
       - name: "Validate Outputs"
         uses: cssnr/validate-outputs-action@master
@@ -75,7 +104,7 @@ jobs:
         uses: ./
         with:
           url: "https://github.com/cssnr/vitepress-plugin-contributors/releases/download/0.0.5/get-contributors.js"
-          repo: smashedr/homebrew-test
+          repo: ${{ env.repository }}
           formula: npmstat.rb
           commit: false
 
