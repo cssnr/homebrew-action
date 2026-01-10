@@ -80,6 +80,8 @@ runs:
       id: inputs
       shell: bash
       run: |
+        echo "::group::Inputs"
+
         echo "inputs.url: ${{ inputs.url }}"
         echo "inputs.sha256: ${{ inputs.sha256 }}"
         echo "inputs.version: ${{ inputs.version }}"
@@ -94,6 +96,8 @@ runs:
         echo "inputs.app_id: ${{ inputs.app_id }}"
         echo "inputs.commit: ${{ inputs.commit }}"
         echo "inputs.pull: ${{ inputs.pull }}"
+
+        echo "::endgroup::"
 
         owner="$(echo "${{ inputs.repo }}" | cut -d "/" -f 1)"
         echo "1️⃣ owner: ${owner}"
