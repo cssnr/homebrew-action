@@ -1,6 +1,11 @@
+[![GitHub Tag Major](https://img.shields.io/github/v/tag/cssnr/homebrew-action?sort=semver&filter=!v*.*&logo=git&logoColor=white&labelColor=585858&label=%20)](https://github.com/cssnr/homebrew-action/tags)
+[![GitHub Tag Minor](https://img.shields.io/github/v/tag/cssnr/homebrew-action?sort=semver&filter=!v*.*.*&logo=git&logoColor=white&labelColor=585858&label=%20)](https://github.com/cssnr/homebrew-action/releases)
+[![GitHub Release Version](https://img.shields.io/github/v/release/cssnr/homebrew-action?logo=git&logoColor=white&labelColor=585858&label=%20)](https://github.com/cssnr/homebrew-action/releases/latest)
+[![GitHub Dist Size](https://img.shields.io/github/size/cssnr/homebrew-action/dist%2Findex.js?logo=bookstack&logoColor=white&label=dist%20size)](https://github.com/cssnr/homebrew-action/blob/master/src)
 [![Action Run Using](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcssnr%2Fhomebrew-action%2Frefs%2Fheads%2Fmaster%2Faction.yml&query=%24.runs.using&logo=githubactions&logoColor=white&label=runs)](https://github.com/cssnr/homebrew-action/blob/master/action.yml)
 [![Workflow Test](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/test.yaml?logo=cachet&label=test)](https://github.com/cssnr/homebrew-action/actions/workflows/test.yaml)
 [![Workflow Lint](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/lint.yaml?logo=cachet&label=lint)](https://github.com/cssnr/homebrew-action/actions/workflows/lint.yaml)
+[![Workflow Release](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/release.yaml?logo=cachet&label=release)](https://github.com/cssnr/homebrew-action/actions/workflows/release.yaml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/cssnr/homebrew-action?logo=github&label=updated)](https://github.com/cssnr/homebrew-action/pulse)
 [![GitHub Repo Size](https://img.shields.io/github/repo-size/cssnr/homebrew-action?logo=bookstack&logoColor=white&label=repo%20size)](https://github.com/cssnr/homebrew-action?tab=readme-ov-file#readme)
 [![GitHub Contributors](https://img.shields.io/github/contributors-anon/cssnr/homebrew-action?logo=github)](https://github.com/cssnr/homebrew-action/graphs/contributors)
@@ -28,6 +33,8 @@
 
 ✅ Auth with `token` or `app_id`/`app_private_key` for Verified commits.
 
+[![Verified Commit](https://raw.githubusercontent.com/smashedr/repo-images/refs/heads/master/homebrew/commit.jpg)](https://github.com/cssnr/homebrew-tap/?tab=readme-ov-file#readme)
+
 ```yaml
 - name: 'Homebrew Action'
   uses: cssnr/homebrew-action@master
@@ -47,7 +54,7 @@
 
 For more workflow examples, see the [Examples](#examples) section.
 
-For an example Tap, see my tap: <https://github.com/cssnr/homebrew-tap>
+For an example Tap, see: <https://github.com/cssnr/homebrew-tap>
 
 To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](https://github.com/cssnr/homebrew-tap/blob/master/.github/workflows/test.yaml)
 
