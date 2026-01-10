@@ -116,15 +116,20 @@ runs:
       id: token
       shell: bash
       run: |
-        if [ -n "${{ steps.app.outputs.token }}" ];then
+        if [ -n "${{ inputs.app_id }}" ];then
           echo "🤖 Using Generated App Token"
-          echo "token=${{ steps.app.outputs.token }}" >> "$GITHUB_OUTPUT"
+          token="${{ steps.app.outputs.token }}"
         else
           echo "🧑 Using User Provided Token"
-          echo "token=${{ inputs.token }}" >> "$GITHUB_OUTPUT"
+          token="${{ inputs.token }}"
         fi
+        if [ -z "${token}" ];then
+          echo "::error::Error processing access token."
+          exit 1
+        fi
+        echo "token=${token}" >> "$GITHUB_OUTPUT"
 
-    - name: "Get Default Branch"
+    - name: "Set Branch"
       id: branch
       env:
         GH_TOKEN: ${{ steps.token.outputs.token }}
@@ -163,7 +168,7 @@ runs:
         repository: ${{ inputs.repo }}
         token: ${{ steps.token.outputs.token }}
 
-    - name: "Set Formula File"
+    - name: "Set Formula"
       env:
         path: homebrew-tap/Formula
       shell: bash
@@ -197,7 +202,7 @@ runs:
         echo "📒 formula: ${formula}"
         echo "formula=${formula}" >> "$GITHUB_ENV"
 
-    - name: "Calculate Hash"
+    - name: "Set Hash"
       shell: bash
       run: |
         unset sha256
@@ -272,7 +277,7 @@ runs:
     - name: "Commit Action"
       if: ${{ inputs.commit == 'true' }}
       id: commit
-      uses: suzuki-shunsuke/commit-action@87b297f0ce551411b43d1880f4fb3cbc60381055 # v0.0.14
+      uses: suzuki-shunsuke/commit-action@f28421acc277a6d6a9c1f94ea449076ad77dba67 # v0.1.0
       with:
         root_dir: homebrew-tap
         branch: ${{ env.head_branch }}
@@ -283,29 +288,22 @@ runs:
         #app_id: ${{ inputs.app_id }}
         #app_private_key: ${{ inputs.app_private_key }}
 
-    - name: "Create Pull Request"
+    - name: "Create Pull"
       id: pull
       if: ${{ inputs.commit == 'true' && inputs.pull != 'false' }}
-      env:
-        GH_TOKEN: ${{ steps.token.outputs.token }}
-      shell: bash
-      run: |
-        pull="$(gh api --method POST \
-          -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
-          "/repos/${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}/pulls" \
-            -f 'title=${{ steps.summary.outputs.message }}' \
-            -f 'body=${{ steps.summary.outputs.message }}' \
-            -f 'head=${{ env.head_branch }}' \
-            -f 'base=${{ env.branch }}' \
-        )"
-        echo "::group::pull"
-        echo "${pull}"
-        echo "::endgroup::"
-        echo "pull=${pull}" >> "$GITHUB_OUTPUT"
+      uses: cssnr/create-pull-action@master
+      with:
+        repository: ${{ inputs.repo }}
+        head: ${{ env.head_branch }}
+        base: ${{ env.branch }}
+        title: ${{ steps.summary.outputs.message }}
+        body: ${{ steps.summary.outputs.message }}
+        token: ${{ steps.token.outputs.token }}
+        #summary: ${{ inputs.summary }}
 
     - name: "Debug Pull Request"
       if: ${{ inputs.commit == 'true' && inputs.pull != 'false' }}
       shell: bash
       run: |
         echo "html_url: ${{ fromJSON(steps.pull.outputs.pull).html_url }}"
-        echo "changed_files: ${{ fromJSON(steps.pull.outputs.pull).changed_files }}"
+        echo "number: ${{ fromJSON(steps.pull.outputs.pull).number }}"

@@ -120,7 +120,7 @@ The commit `sha` and `pull` json are only set if `commit` and/or `pull` is enabl
 Tip: you can parse the `pull` output with `fromJSON`.
 
 ```yaml
-run: echo "${{ fromJSON(steps.pull.outputs.pull).html_url }}"
+- run: echo html_url ${{ fromJSON(steps.pull.outputs.pull).html_url }}
 ```
 
 ## Examples

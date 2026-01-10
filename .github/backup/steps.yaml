@@ -39,3 +39,23 @@
     base: ${{ env.branch }}
     committer: ${{ steps.user.outputs.string }}
     body: "Disable Advertising"
+
+- name: "Create Pull Request"
+  id: pull
+  if: ${{ inputs.commit == 'true' && inputs.pull != 'false' }}
+  env:
+    GH_TOKEN: ${{ steps.token.outputs.token }}
+  shell: bash
+  run: |
+    pull="$(gh api --method POST \
+      -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+      "/repos/${{ steps.inputs.outputs.owner }}/${{ steps.inputs.outputs.repo }}/pulls" \
+        -f 'title=${{ steps.summary.outputs.message }}' \
+        -f 'body=${{ steps.summary.outputs.message }}' \
+        -f 'head=${{ env.head_branch }}' \
+        -f 'base=${{ env.branch }}' \
+    )"
+    echo "::group::pull"
+    echo "${pull}"
+    echo "::endgroup::"
+    echo "pull=${pull}" >> "$GITHUB_OUTPUT"
