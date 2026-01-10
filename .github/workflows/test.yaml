@@ -33,17 +33,21 @@ jobs:
         uses: actions/checkout@v6
 
       - name: "Cleanup PR"
-        #continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_TEST }}
         run: |
-          number="$(gh pr list --repo "${{ env.repository }}" --json number --template '{{(index . 0).number}}')"
-          echo "number: ${number}"
-          [ -z "${number}" ] && exit 0
-          echo "Closing Pull Request: ${number}"
-          gh pr close --repo "${{ env.repository }}" -d "${number}"
-          echo "Waiting 3 Seconds..."
-          sleep 3
+          number="$(gh pr list \
+            --repo "${{ env.repository }}" --json number \
+            --template '{{if gt (len .) 0}}{{(index . 0).number}}{{end}}' \
+          )"
+          if [ -n "${number}" ];then
+            echo "Closing Pull Request: ${number}"
+            gh pr close --repo "${{ env.repository }}" "${number}"
+            echo "Waiting 3 Seconds..."
+            sleep 3
+          else
+            echo "No PR's found: ${{ github.server_url }}/${{ env.repository }}/pulls"
+          fi
 
       - name: "Test Local Action"
         id: test
@@ -62,6 +66,15 @@ jobs:
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
           #commit: false
           pull: true
+
+      #- name: "Add PR Comment"
+      #  if: ${{ github.event_name == 'pull_request' }}
+      #  continue-on-error: true
+      #  env:
+      #    GH_TOKEN: ${{ secrets.HOMEBREW_TEST }}
+      #  run: |
+      #    gh pr comment ${{ fromJSON(steps.test.outputs.pull).number }} -b \
+      #    "PR: ${{ fromJSON(steps.test.outputs.pull).html_url }}"
 
       - name: "Validate Outputs"
         uses: cssnr/validate-outputs-action@master
