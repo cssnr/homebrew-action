@@ -1,18 +1,19 @@
 [![GitHub Tag Major](https://img.shields.io/github/v/tag/cssnr/homebrew-action?sort=semver&filter=!v*.*&logo=git&logoColor=white&labelColor=585858&label=%20)](https://github.com/cssnr/homebrew-action/tags)
 [![GitHub Tag Minor](https://img.shields.io/github/v/tag/cssnr/homebrew-action?sort=semver&filter=!v*.*.*&logo=git&logoColor=white&labelColor=585858&label=%20)](https://github.com/cssnr/homebrew-action/releases)
 [![GitHub Release Version](https://img.shields.io/github/v/release/cssnr/homebrew-action?logo=git&logoColor=white&labelColor=585858&label=%20)](https://github.com/cssnr/homebrew-action/releases/latest)
-[![GitHub Dist Size](https://img.shields.io/github/size/cssnr/homebrew-action/dist%2Findex.js?logo=bookstack&logoColor=white&label=dist%20size)](https://github.com/cssnr/homebrew-action/blob/master/src)
 [![Action Run Using](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcssnr%2Fhomebrew-action%2Frefs%2Fheads%2Fmaster%2Faction.yml&query=%24.runs.using&logo=githubactions&logoColor=white&label=runs)](https://github.com/cssnr/homebrew-action/blob/master/action.yml)
-[![Workflow Test](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/test.yaml?logo=cachet&label=test)](https://github.com/cssnr/homebrew-action/actions/workflows/test.yaml)
-[![Workflow Lint](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/lint.yaml?logo=cachet&label=lint)](https://github.com/cssnr/homebrew-action/actions/workflows/lint.yaml)
-[![Workflow Release](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/release.yaml?logo=cachet&label=release)](https://github.com/cssnr/homebrew-action/actions/workflows/release.yaml)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/cssnr/homebrew-action?logo=github&label=updated)](https://github.com/cssnr/homebrew-action/pulse)
-[![GitHub Repo Size](https://img.shields.io/github/repo-size/cssnr/homebrew-action?logo=bookstack&logoColor=white&label=repo%20size)](https://github.com/cssnr/homebrew-action?tab=readme-ov-file#readme)
-[![GitHub Contributors](https://img.shields.io/github/contributors-anon/cssnr/homebrew-action?logo=github)](https://github.com/cssnr/homebrew-action/graphs/contributors)
-[![GitHub Discussions](https://img.shields.io/github/discussions/cssnr/homebrew-action?logo=github)](https://github.com/cssnr/homebrew-action/discussions)
-[![GitHub Forks](https://img.shields.io/github/forks/cssnr/homebrew-action?style=flat&logo=github)](https://github.com/cssnr/homebrew-action/forks)
-[![GitHub Repo Stars](https://img.shields.io/github/stars/cssnr/homebrew-action?style=flat&logo=github)](https://github.com/cssnr/homebrew-action/stargazers)
-[![GitHub Org Stars](https://img.shields.io/github/stars/cssnr?style=flat&logo=github&label=org%20stars)](https://cssnr.github.io/)
+[![Workflow Release](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/release.yaml?logo=checkmarx&logoColor=white&label=release)](https://github.com/cssnr/homebrew-action/actions/workflows/release.yaml)
+[![Workflow Test](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/test.yaml?logo=checkmarx&logoColor=white&label=test)](https://github.com/cssnr/homebrew-action/actions/workflows/test.yaml)
+[![Workflow Lint](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/lint.yaml?logo=checkmarx&logoColor=white&label=lint)](https://github.com/cssnr/homebrew-action/actions/workflows/lint.yaml)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/cssnr/homebrew-action?logo=github&label=updated)](https://github.com/cssnr/homebrew-action)
+[![Codeberg Last Commit](https://img.shields.io/gitea/last-commit/cssnr/homebrew-action/master?gitea_url=https%3A%2F%2Fcodeberg.org%2F&logo=codeberg&logoColor=white&label=updated)](https://codeberg.org/cssnr/homebrew-action)
+[![GitHub Repo Size](https://img.shields.io/github/repo-size/cssnr/homebrew-action?logo=buffer&label=repo%20size)](https://github.com/cssnr/homebrew-action?tab=readme-ov-file#readme)
+[![GitHub Contributors](https://img.shields.io/github/contributors-anon/cssnr/homebrew-action?logo=southwestairlines)](https://github.com/cssnr/homebrew-action/graphs/contributors)
+[![GitHub Issues](https://img.shields.io/github/issues/cssnr/homebrew-action?logo=codeforces&logoColor=white)](https://github.com/cssnr/homebrew-action/issues)
+[![GitHub Discussions](https://img.shields.io/github/discussions/cssnr/homebrew-action?logo=rocketdotchat&logoColor=white)](https://github.com/cssnr/homebrew-action/discussions)
+[![GitHub Forks](https://img.shields.io/github/forks/cssnr/homebrew-action?style=flat&logo=forgejo&logoColor=white)](https://github.com/cssnr/homebrew-action/forks)
+[![GitHub Repo Stars](https://img.shields.io/github/stars/cssnr/homebrew-action?style=flat&logo=gleam&logoColor=white)](https://github.com/cssnr/homebrew-action/stargazers)
+[![GitHub Org Stars](https://img.shields.io/github/stars/cssnr?style=flat&logo=apachespark&logoColor=white&label=org%20stars)](https://cssnr.github.io/)
 [![Discord](https://img.shields.io/discord/899171661457293343?logo=discord&logoColor=white&label=discord&color=7289da)](https://discord.gg/wXy6m2X8wY)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-72a5f2?logo=kofi&label=support)](https://ko-fi.com/cssnr)
 
@@ -223,17 +224,15 @@ For more examples, check out other projects using this action:
 
 If you run into any issues or need help getting started, please do one of the following:
 
-- Report an Issue: <https://github.com/cssnr/homebrew-action/issues>
-- Q&A Discussion: <https://github.com/cssnr/homebrew-action/discussions/categories/q-a>
-- Request a Feature: <https://github.com/cssnr/homebrew-action/issues/new?template=1-feature.yaml>
-- Chat with us on Discord: <https://discord.gg/wXy6m2X8wY>
+- [Report an Issue](https://github.com/cssnr/homebrew-action/issues)
+- [Q&A Discussion](https://github.com/cssnr/homebrew-action/discussions/categories/q-a)
+- [Request a Feature](https://github.com/cssnr/homebrew-action/issues/new?template=1-feature.yaml)
+- [Chat with us on Discord](https://discord.gg/wXy6m2X8wY)
 
-[![Features](https://img.shields.io/badge/features-brightgreen?style=for-the-badge&logo=verizon&logoColor=white)](https://github.com/cssnr/homebrew-action/issues/new?template=1-feature.yaml)
+[![Features](https://img.shields.io/badge/features-brightgreen?style=for-the-badge&logo=rocket&logoColor=white)](https://github.com/cssnr/homebrew-action/issues/new?template=1-feature.yaml)
 [![Issues](https://img.shields.io/badge/issues-red?style=for-the-badge&logo=southwestairlines&logoColor=white)](https://github.com/cssnr/homebrew-action/issues)
-[![Discussions](https://img.shields.io/badge/discussions-blue?style=for-the-badge&logo=rocketdotchat&logoColor=white)](https://github.com/cssnr/homebrew-action/discussions)
+[![Discussions](https://img.shields.io/badge/discussions-blue?style=for-the-badge&logo=livechat&logoColor=white)](https://github.com/cssnr/homebrew-action/discussions)
 [![Discord](https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/wXy6m2X8wY)
-
-For more information, see the CSSNR [SUPPORT.md](https://github.com/cssnr/.github/blob/master/.github/SUPPORT.md#support).
 
 # Contributing
 
