@@ -115,9 +115,9 @@ runs:
             echo "::error::Input file provided but not found: ${{ inputs.file }}"
             exit 1
           fi
-          [ -n "${{ inputs.url }}" ] && echo "::warning::Input url ignored when providing a file."
-          [ -n "${{ inputs.sha256 }}" ] && echo "::warning::Input sha256 ignored when providing a file."
-          [ -n "${{ inputs.version }}" ] && echo "::warning::Input version ignored when providing a file."
+          [ -n "${{ inputs.url }}" ] && echo "::warning::Input url ignored when providing a file." ||:
+          [ -n "${{ inputs.sha256 }}" ] && echo "::warning::Input sha256 ignored when providing a file." ||:
+          [ -n "${{ inputs.version }}" ] && echo "::warning::Input version ignored when providing a file." ||:
         fi
 
     - name: "Create App Token"
