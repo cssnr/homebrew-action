@@ -19,6 +19,9 @@ inputs:
   calculate:
     description: "Calculate sha256 from url."
     default: "true"
+  file:
+    description: "Full Formula File (overrides other inputs)."
+    default: ""
   repo:
     description: "Homebrew Tap: owner/name"
     required: true
@@ -86,6 +89,7 @@ runs:
         echo "inputs.sha256: ${{ inputs.sha256 }}"
         echo "inputs.version: ${{ inputs.version }}"
         echo "inputs.calculate: ${{ inputs.calculate }}"
+        echo "inputs.file: ${{ inputs.file }}"
 
         echo "inputs.repo: ${{ inputs.repo }}"
         echo "inputs.formula: ${{ inputs.formula }}"
@@ -105,6 +109,16 @@ runs:
         repo="$(echo "${{ inputs.repo }}" | cut -d "/" -f 2)"
         echo "2️⃣ repo: ${repo}"
         echo "repo=${repo}" >> "$GITHUB_OUTPUT"
+
+        if [ -n "${{ inputs.file }}" ];then
+          if [ ! -f "${{ inputs.file }}" ];then
+            echo "::error::Input file provided but not found: ${{ inputs.file }}"
+            exit 1
+          fi
+          [ -n "${{ inputs.url }}" ] && echo "::warning::Input url ignored when providing a file." ||:
+          [ -n "${{ inputs.sha256 }}" ] && echo "::warning::Input sha256 ignored when providing a file." ||:
+          [ -n "${{ inputs.version }}" ] && echo "::warning::Input version ignored when providing a file." ||:
+        fi
 
     - name: "Create App Token"
       if: ${{ inputs.app_id }}
@@ -208,6 +222,7 @@ runs:
         echo "formula=${formula}" >> "$GITHUB_ENV"
 
     - name: "Set Hash"
+      if: ${{ !inputs.file }}
       shell: bash
       run: |
         unset sha256
@@ -228,6 +243,7 @@ runs:
         echo "sha256=${sha256}" >> "$GITHUB_ENV"
 
     - name: "Update Formula"
+      if: ${{ !inputs.file }}
       shell: bash
       run: |
         echo "formula: ${{ env.formula }}"
@@ -239,6 +255,16 @@ runs:
         echo "::group::cat ${{ env.formula }}"
         cat -n "${{ env.formula }}"
         echo "::endgroup::"
+
+    - name: "Update Formula File"
+      if: ${{ inputs.file }}
+      shell: bash
+      run: |
+        echo "file: ${{ inputs.file }}"
+        echo "::group::cat ${{ inputs.file }}"
+        cat -n "${{ inputs.file }}"
+        echo "::endgroup::"
+        cp -f "${{ inputs.file }}" ${{ env.formula }}
 
     - name: "Job Summary"
       id: summary
@@ -276,6 +302,7 @@ runs:
         md+="url: \`${{ inputs.url || 'not provided' }}\`\n"
         md+="sha256: \`${{ env.sha256 || 'not provided' }}\`\n"
         md+="version: \`${{ inputs.version || 'not provided' }}\`\n"
+        md+="file: \`${{ inputs.file || 'not provided' }}\`\n"
         md+="git diff:\n\`\`\`diff\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 

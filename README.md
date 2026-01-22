@@ -2,15 +2,15 @@
 [![GitHub Tag Minor](https://img.shields.io/github/v/tag/cssnr/homebrew-action?sort=semver&filter=!v*.*.*&logo=git&logoColor=white&labelColor=585858&label=%20)](https://github.com/cssnr/homebrew-action/releases)
 [![GitHub Release Version](https://img.shields.io/github/v/release/cssnr/homebrew-action?logo=git&logoColor=white&labelColor=585858&label=%20)](https://github.com/cssnr/homebrew-action/releases/latest)
 [![Action Run Using](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcssnr%2Fhomebrew-action%2Frefs%2Fheads%2Fmaster%2Faction.yml&query=%24.runs.using&logo=githubactions&logoColor=white&label=runs)](https://github.com/cssnr/homebrew-action/blob/master/action.yml)
-[![Workflow Release](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/release.yaml?logo=checkmarx&logoColor=white&label=release)](https://github.com/cssnr/homebrew-action/actions/workflows/release.yaml)
-[![Workflow Test](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/test.yaml?logo=checkmarx&logoColor=white&label=test)](https://github.com/cssnr/homebrew-action/actions/workflows/test.yaml)
-[![Workflow Lint](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/lint.yaml?logo=checkmarx&logoColor=white&label=lint)](https://github.com/cssnr/homebrew-action/actions/workflows/lint.yaml)
+[![Workflow Release](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/release.yaml?logo=testcafe&logoColor=white&label=release)](https://github.com/cssnr/homebrew-action/actions/workflows/release.yaml)
+[![Workflow Test](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/test.yaml?logo=testcafe&logoColor=white&label=test)](https://github.com/cssnr/homebrew-action/actions/workflows/test.yaml)
+[![Workflow Lint](https://img.shields.io/github/actions/workflow/status/cssnr/homebrew-action/lint.yaml?logo=testcafe&logoColor=white&label=lint)](https://github.com/cssnr/homebrew-action/actions/workflows/lint.yaml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/cssnr/homebrew-action?logo=github&label=updated)](https://github.com/cssnr/homebrew-action)
 [![Codeberg Last Commit](https://img.shields.io/gitea/last-commit/cssnr/homebrew-action/master?gitea_url=https%3A%2F%2Fcodeberg.org%2F&logo=codeberg&logoColor=white&label=updated)](https://codeberg.org/cssnr/homebrew-action)
 [![GitHub Repo Size](https://img.shields.io/github/repo-size/cssnr/homebrew-action?logo=buffer&label=repo%20size)](https://github.com/cssnr/homebrew-action?tab=readme-ov-file#readme)
 [![GitHub Contributors](https://img.shields.io/github/contributors-anon/cssnr/homebrew-action?logo=southwestairlines)](https://github.com/cssnr/homebrew-action/graphs/contributors)
 [![GitHub Issues](https://img.shields.io/github/issues/cssnr/homebrew-action?logo=codeforces&logoColor=white)](https://github.com/cssnr/homebrew-action/issues)
-[![GitHub Discussions](https://img.shields.io/github/discussions/cssnr/homebrew-action?logo=rocketdotchat&logoColor=white)](https://github.com/cssnr/homebrew-action/discussions)
+[![GitHub Discussions](https://img.shields.io/github/discussions/cssnr/homebrew-action?logo=livechat&logoColor=white)](https://github.com/cssnr/homebrew-action/discussions)
 [![GitHub Forks](https://img.shields.io/github/forks/cssnr/homebrew-action?style=flat&logo=forgejo&logoColor=white)](https://github.com/cssnr/homebrew-action/forks)
 [![GitHub Repo Stars](https://img.shields.io/github/stars/cssnr/homebrew-action?style=flat&logo=gleam&logoColor=white)](https://github.com/cssnr/homebrew-action/stargazers)
 [![GitHub Org Stars](https://img.shields.io/github/stars/cssnr?style=flat&logo=apachespark&logoColor=white&label=org%20stars)](https://cssnr.github.io/)
@@ -30,7 +30,7 @@
 - [Support](#Support)
 - [Contributing](#Contributing)
 
-🍺 Homebrew Action to Update Formula `url`, `version` and `sha256`.
+🍺 Homebrew Action to Update Formula `url`, `version` and `sha256` or the entire `file`.
 
 ✅ Auth with `token` or `app_id`/`app_private_key` for Verified commits.
 
@@ -44,6 +44,7 @@
     sha256: a6c550e966e # calculated from url
     version: ${{ github.ref_name }} # optional
     calculate: true # true is default, optional
+    file: path/to/full/formula.rb # optional
     repo: cssnr/homebrew-tap # set to your tap
     formula: toml-run.rb # optional
     message: Bump toml-run # optional
@@ -64,6 +65,7 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 - Works on any Custom Tap
 - Update `url`, `sha256`, or `version`
 - Calculate `sha256` from the `url`
+- Provide your own formula `file`
 - Automatically find `formula` file
 - Commit: Commit and Push to a `branch`
 - Pull: Optionally create a `pull` Request
@@ -80,6 +82,7 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 | `sha256`          | _calculated from `url`_ | Formula Hash to update         |
 | `version`         |            -            | Formula Version to update      |
 | `calculate`       |         `true`          | Calculate `sha256` from `url`  |
+| `file`            |            -            | Full Formula File to use       |
 | `repo`            |       _Required_        | Repository `{owner}/{name}`    |
 | `formula`         |    `{repo-name}.rb`     | File relative to `Formula`     |
 | `message`         |  Bump `{.rb}` to `{v}`  | Commit Message                 |
@@ -90,9 +93,11 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 | `commit`          |         `true`          | Commit and Push Changes        |
 | `pull`            |         `false`         | Create a Pull Request          |
 
-You should provide at least one of `url`, `sha256` or `version` to update.
+You should provide at least one of `url`, `sha256`, `version`, or `file` to update.
 
 The `sha256` is calculated from the `url` unless the `sha256` is provided or `calculate` is set to `false`.
+
+If you provide a Formula `file` it will be copied as is and the above inputs will be ignored.
 
 To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
@@ -152,6 +157,17 @@ Minimal with Provided URL.
   uses: cssnr/homebrew-action@master
   with:
     url: https://... # used to calculate the sha256
+    repo: cssnr/homebrew-tap
+    token: ${{ secrets.REPO_TOKEN }}
+```
+
+Minimal with Provided Formula File (GoReleaser).
+
+```yaml
+- name: 'Homebrew Action'
+  uses: cssnr/homebrew-action@master
+  with:
+    file: dist/homebrew/Formula/name.rb # full formula file
     repo: cssnr/homebrew-tap
     token: ${{ secrets.REPO_TOKEN }}
 ```
