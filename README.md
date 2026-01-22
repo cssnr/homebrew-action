@@ -166,7 +166,7 @@ Minimal with Provided Formula File (GoReleaser).
 - name: 'Homebrew Action'
   uses: cssnr/homebrew-action@master
   with:
-    file: 'dist/homebrew/Formula/name.rb'
+    file: dist/homebrew/Formula/name.rb # full formula file
     repo: cssnr/homebrew-tap
     token: ${{ secrets.REPO_TOKEN }}
 ```

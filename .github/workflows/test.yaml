@@ -66,6 +66,7 @@ jobs:
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
           #commit: false
           pull: true
+          file: "event.json" # TODO: DEBUGGING ONLY
 
       #- name: "Add PR Comment"
       #  if: ${{ github.event_name == 'pull_request' }}

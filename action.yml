@@ -112,7 +112,7 @@ runs:
 
         if [ -n "${{ inputs.file }}" ];then
           if [ ! -f "${{ inputs.file }}" ];then
-            echo "::error::inputs.file provided but not found: ${{ inputs.file }}"
+            echo "::error::Input file provided but not found: ${{ inputs.file }}"
             exit 1
           fi
           [ -n "${{ inputs.url }}" ] && echo "::warning::Input url ignored when providing a file."
