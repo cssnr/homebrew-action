@@ -30,7 +30,7 @@
 - [Support](#Support)
 - [Contributing](#Contributing)
 
-🍺 Homebrew Action to Update Formula `url`, `version` and `sha256`.
+🍺 Homebrew Action to Update Formula `url`, `version` and `sha256` or the entire file.
 
 ✅ Auth with `token` or `app_id`/`app_private_key` for Verified commits.
 
@@ -64,6 +64,7 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 - Works on any Custom Tap
 - Update `url`, `sha256`, or `version`
 - Calculate `sha256` from the `url`
+- Provide your own formula `file`
 - Automatically find `formula` file
 - Commit: Commit and Push to a `branch`
 - Pull: Optionally create a `pull` Request
@@ -80,6 +81,7 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 | `sha256`          | _calculated from `url`_ | Formula Hash to update         |
 | `version`         |            -            | Formula Version to update      |
 | `calculate`       |         `true`          | Calculate `sha256` from `url`  |
+| `file`            |            -            | Full Formula File to use       |
 | `repo`            |       _Required_        | Repository `{owner}/{name}`    |
 | `formula`         |    `{repo-name}.rb`     | File relative to `Formula`     |
 | `message`         |  Bump `{.rb}` to `{v}`  | Commit Message                 |
@@ -90,9 +92,11 @@ To test your formula, see: [cssnr/homebrew-tap/.github/workflows/test.yaml](http
 | `commit`          |         `true`          | Commit and Push Changes        |
 | `pull`            |         `false`         | Create a Pull Request          |
 
-You should provide at least one of `url`, `sha256` or `version` to update.
+You should provide at least one of `url`, `sha256`, `version`, or `file` to update.
 
 The `sha256` is calculated from the `url` unless the `sha256` is provided or `calculate` is set to `false`.
+
+If you provide a Formula `file` it will be copied as is and the above inputs will be ignored.
 
 To `commit` you must provide a `token` or an `app_id` + `app_private_key`. _See [Permissions](#permissions)._
 
@@ -152,6 +156,17 @@ Minimal with Provided URL.
   uses: cssnr/homebrew-action@master
   with:
     url: https://... # used to calculate the sha256
+    repo: cssnr/homebrew-tap
+    token: ${{ secrets.REPO_TOKEN }}
+```
+
+Minimal with Provided Formula File (GoReleaser).
+
+```yaml
+- name: 'Homebrew Action'
+  uses: cssnr/homebrew-action@master
+  with:
+    file: 'dist/homebrew/Formula/name.rb'
     repo: cssnr/homebrew-tap
     token: ${{ secrets.REPO_TOKEN }}
 ```
