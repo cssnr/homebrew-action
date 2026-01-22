@@ -302,6 +302,7 @@ runs:
         md+="url: \`${{ inputs.url || 'not provided' }}\`\n"
         md+="sha256: \`${{ env.sha256 || 'not provided' }}\`\n"
         md+="version: \`${{ inputs.version || 'not provided' }}\`\n"
+        md+="file: \`${{ inputs.file || 'not provided' }}\`\n"
         md+="git diff:\n\`\`\`diff\n${diff}\n\`\`\`\n"
         echo -e "${md}" >> "$GITHUB_STEP_SUMMARY"
 
